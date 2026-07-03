@@ -1,0 +1,52 @@
+name: Build PyPI Package
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version name for the release (e.g., 1.0.0)'
+        required: true
+        type: string
+  workflow_call:
+    inputs:
+      version:
+        description: 'Version name for the release (e.g., 1.0.0)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build-pypi:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v6
+    
+    - name: Set up Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: '3.13'
+
+    - name: Install build dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install build
+        
+    - name: Build PyPI package
+      run: |
+        python build_release.py
+
+    - name: Upload Release Assets
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: v${{ inputs.version || github.event.inputs.version }}
+        name: YTSage v${{ inputs.version || github.event.inputs.version }}
+        draft: true
+        prerelease: false
+        files: |
+          dist/*
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
