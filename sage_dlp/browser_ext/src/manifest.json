@@ -1,6 +1,6 @@
 {
-  "name": "SageDLP Cookie Bridge",
-  "description": "Auto-sends cookies to SageDLP via localhost:9876 (forked from Get cookies.txt LOCALLY)",
+  "name": "SageDLP",
+  "description": "Auto-sends cookies to SageDLP for seamless YouTube cookie authentication",
   "version": "0.7.3",
   "manifest_version": 3,
   "permissions": ["activeTab", "cookies", "downloads", "notifications"],
