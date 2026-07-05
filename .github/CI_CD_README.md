@@ -1,6 +1,6 @@
-# YTSage CI/CD Workflow
+# SageDLP CI/CD Workflow
 
-This repository uses GitHub Actions to automatically build and release YTSage for multiple platforms. The workflow is designed to be manually triggered, allowing for flexibility in building specific versions or platforms on demand.
+This repository uses GitHub Actions to automatically build and release SageDLP for multiple platforms. The workflow is designed to be manually triggered, allowing for flexibility in building specific versions or platforms on demand.
 
 ## How It Works
 
@@ -41,24 +41,24 @@ The workflows are triggered manually via the GitHub Actions "Workflow Dispatch" 
 The workflow creates the following files based on the platform:
 
 #### Windows
-- `YTSage-v{version}-portable.zip` - Standard portable version
-- `YTSage-v{version}-ffmpeg-portable.zip` - FFmpeg bundle portable
-- `YTSage-v{version}-Setup.exe` - Standard installer
-- `YTSage-v{version}-ffmpeg-Setup.exe` - FFmpeg bundle installer
+- `SageDLP-v{version}-portable.zip` - Standard portable version
+- `SageDLP-v{version}-ffmpeg-portable.zip` - FFmpeg bundle portable
+- `SageDLP-v{version}-Setup.exe` - Standard installer
+- `SageDLP-v{version}-ffmpeg-Setup.exe` - FFmpeg bundle installer
 
 #### Linux
-- `YTSage-v{version}-{arch}.AppImage` - AppImage portable (x86_64, aarch64)
-- `YTSage-v{version}-{arch}.rpm` - RPM package
-- `YTSage-v{version}-{arch}.deb` - Debian package
-- `YTSage-v{version}-{arch}.flatpak` - Flatpak bundle
+- `SageDLP-v{version}-{arch}.AppImage` - AppImage portable (x86_64, aarch64)
+- `SageDLP-v{version}-{arch}.rpm` - RPM package
+- `SageDLP-v{version}-{arch}.deb` - Debian package
+- `SageDLP-v{version}-{arch}.flatpak` - Flatpak bundle
 
 #### macOS
-- `YTSage-v{version}-arm64.app.zip` - Zipped application bundle
-- `YTSage-v{version}-arm64.dmg` - Disk image installer
+- `SageDLP-v{version}-arm64.app.zip` - Zipped application bundle
+- `SageDLP-v{version}-arm64.dmg` - Disk image installer
 
 #### PyPI
-- `ytsage-{version}-py3-none-any.whl` - Python Wheel
-- `ytsage-{version}.tar.gz` - Source Distribution
+- `sage-dlp-{version}-py3-none-any.whl` - Python Wheel
+- `sage-dlp-{version}.tar.gz` - Source Distribution
 
 ## Workflow Features
 

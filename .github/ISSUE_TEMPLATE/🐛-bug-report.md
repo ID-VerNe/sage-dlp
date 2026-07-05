@@ -19,7 +19,7 @@ assignees: ''
 <!-- Example: https://www.youtube.com/watch?v=ABC123XYZ -->
 
 ## 🔄 Steps to Reproduce
-1. <!-- Step 1 (e.g., "Pasted the URL above into YTSage") -->
+1. <!-- Step 1 (e.g., "Pasted the URL above into SageDLP") -->
 2. <!-- Step 2 -->
 3. <!-- Step 3 -->
 4. <!-- ... -->
@@ -30,7 +30,7 @@ assignees: ''
 <!-- What actually happened? -->
 
 ## 🖥️ Environment
-- **YTSage Version**: <!-- e.g., v4.5.0 -->
+- **SageDLP Version**: <!-- e.g., v4.5.0 -->
 - **yt-dlp Version**: <!-- e.g., 2025.11.12 -->
 - **OS**: <!-- e.g., Windows 11, macOS Ventura, Ubuntu 22.04 -->
 - **Python Version**: <!-- e.g., 3.13.6 -->
@@ -45,10 +45,10 @@ assignees: ''
   Attach screenshots (for GUI issues) or terminal logs (for CLI errors).
   
   To collect log files:
-  1. Open YTSage and reproduce the issue.
+  1. Open SageDLP and reproduce the issue.
   2. Click the **About** button.
   3. Click **Logs** (📂) to open the logs folder.
-  4. Attach `ytsage.log` and `ytsage_error.log`.
+  4. Attach `sage-dlp.log` and `sage-dlp_error.log`.
   
   Use ``` to format logs:
 -->

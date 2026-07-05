@@ -74,11 +74,11 @@ jobs:
       run: |
         # Create entry point script
         $entryContent = @'
-        from ytsage.main import main
+        from sage_dlp.main import main
         if __name__ == "__main__":
             main()
         '@
-        Set-Content -Path "ytsage_entry.py" -Value $entryContent
+        Set-Content -Path "sage_dlp_entry.py" -Value $entryContent
 
         # Create setup script for cx_Freeze
         New-Item -Path "setup_cxfreeze.py" -ItemType File -Force
@@ -91,7 +91,7 @@ jobs:
         Add-Content -Path "setup_cxfreeze.py" -Value "    optimize=2,"
         Add-Content -Path "setup_cxfreeze.py" -Value "    silent=True,"
         Add-Content -Path "setup_cxfreeze.py" -Value "    packages=["
-        Add-Content -Path "setup_cxfreeze.py" -Value '        "ytsage",'
+        Add-Content -Path "setup_cxfreeze.py" -Value '        "sage_dlp",'
         Add-Content -Path "setup_cxfreeze.py" -Value '        "PySide6.QtCore",'
         Add-Content -Path "setup_cxfreeze.py" -Value '        "PySide6.QtGui",'
         Add-Content -Path "setup_cxfreeze.py" -Value '        "PySide6.QtWidgets",'
@@ -139,26 +139,26 @@ jobs:
         Add-Content -Path "setup_cxfreeze.py" -Value '        "tests",'
         Add-Content -Path "setup_cxfreeze.py" -Value "    ],"
         Add-Content -Path "setup_cxfreeze.py" -Value "    include_files=["
-        Add-Content -Path "setup_cxfreeze.py" -Value '        ("ytsage/assets/Icon", "lib/assets/Icon"),'
-        Add-Content -Path "setup_cxfreeze.py" -Value '        ("ytsage/assets/sound", "lib/assets/sound"),'
-        Add-Content -Path "setup_cxfreeze.py" -Value '        ("ytsage/languages", "lib/languages"),'
+        Add-Content -Path "setup_cxfreeze.py" -Value '        ("sage_dlp/assets/Icon", "lib/assets/Icon"),'
+        Add-Content -Path "setup_cxfreeze.py" -Value '        ("sage_dlp/assets/sound", "lib/assets/sound"),'
+        Add-Content -Path "setup_cxfreeze.py" -Value '        ("sage_dlp/languages", "lib/languages"),'
         Add-Content -Path "setup_cxfreeze.py" -Value '        ("branding/icons", "lib/assets/branding/icons"),'
         Add-Content -Path "setup_cxfreeze.py" -Value "    ],"
         Add-Content -Path "setup_cxfreeze.py" -Value ")"
         Add-Content -Path "setup_cxfreeze.py" -Value ""
         Add-Content -Path "setup_cxfreeze.py" -Value "executables = ["
         Add-Content -Path "setup_cxfreeze.py" -Value "    Executable("
-        Add-Content -Path "setup_cxfreeze.py" -Value '        script="ytsage_entry.py",'
-        Add-Content -Path "setup_cxfreeze.py" -Value '        target_name=f"YTSage-v{version}.exe",'
+        Add-Content -Path "setup_cxfreeze.py" -Value '        script="sage_dlp_entry.py",'
+        Add-Content -Path "setup_cxfreeze.py" -Value '        target_name=f"SageDLP-v{version}.exe",'
         Add-Content -Path "setup_cxfreeze.py" -Value '        base="gui",'
-        Add-Content -Path "setup_cxfreeze.py" -Value '        icon="branding/icons/YTSage.ico",'
+        Add-Content -Path "setup_cxfreeze.py" -Value '        icon="branding/icons/SageDLP.ico",'
         Add-Content -Path "setup_cxfreeze.py" -Value "    )"
         Add-Content -Path "setup_cxfreeze.py" -Value "]"
         Add-Content -Path "setup_cxfreeze.py" -Value ""
         Add-Content -Path "setup_cxfreeze.py" -Value "setup("
-        Add-Content -Path "setup_cxfreeze.py" -Value '    name="YTSage",'
+        Add-Content -Path "setup_cxfreeze.py" -Value '    name="SageDLP",'
         Add-Content -Path "setup_cxfreeze.py" -Value "    version=version,"
-        Add-Content -Path "setup_cxfreeze.py" -Value '    description="YTSage",'
+        Add-Content -Path "setup_cxfreeze.py" -Value '    description="SageDLP",'
         Add-Content -Path "setup_cxfreeze.py" -Value '    options={"build_exe": build_exe_options},'
         Add-Content -Path "setup_cxfreeze.py" -Value "    executables=executables,"
         Add-Content -Path "setup_cxfreeze.py" -Value ")"
@@ -176,12 +176,12 @@ jobs:
         if (Test-Path "dist") { Remove-Item "dist" -Recurse -Force }
         
         # Build executable using setup script with extra optimization
-        python -OO setup_cxfreeze.py build_exe --build-exe "dist\YTSage"
+        python -OO setup_cxfreeze.py build_exe --build-exe "dist\SageDLP"
 
     - name: Trim unnecessary files from Standard build
       shell: powershell
       run: |
-        $distDir = "dist\YTSage"
+        $distDir = "dist\SageDLP"
         $libDir = "$distDir\lib"
         if (Test-Path $distDir) {
           # Remove screenshots
@@ -304,15 +304,15 @@ jobs:
         if (Test-Path "build\bdist.*") { Remove-Item "build\bdist.*" -Recurse -Force }
         
         # Create modified setup script for FFmpeg version
-        (Get-Content "setup_cxfreeze.py") -replace 'YTSage-v\{version\}\.exe', 'YTSage-v{version}-ffmpeg.exe' | Set-Content "setup_cxfreeze_ffmpeg.py"
+        (Get-Content "setup_cxfreeze.py") -replace 'SageDLP-v\{version\}\.exe', 'SageDLP-v{version}-ffmpeg.exe' | Set-Content "setup_cxfreeze_ffmpeg.py"
         
         # Build executable with FFmpeg using setup script
-        python -OO setup_cxfreeze_ffmpeg.py build_exe --build-exe "dist\YTSage-FFmpeg"
+        python -OO setup_cxfreeze_ffmpeg.py build_exe --build-exe "dist\SageDLP-FFmpeg"
 
         # Copy FFmpeg binaries into dist folder post-build (more reliable than CLI include)
         # Note: ffplay.exe is excluded as it's not needed by the application
         if ($env:FFMPEG_PATH) {
-          $destDir = "dist\YTSage-FFmpeg"
+          $destDir = "dist\SageDLP-FFmpeg"
           $ffmpegExe = Join-Path $env:FFMPEG_PATH "ffmpeg.exe"
           $ffprobeExe = Join-Path $env:FFMPEG_PATH "ffprobe.exe"
 
@@ -330,7 +330,7 @@ jobs:
     - name: Trim unnecessary files from FFmpeg build
       shell: powershell
       run: |
-        $distDir = "dist\YTSage-FFmpeg"
+        $distDir = "dist\SageDLP-FFmpeg"
         $libDir = "$distDir\lib"
         if (Test-Path $distDir) {
           # Remove screenshots
@@ -415,9 +415,9 @@ jobs:
         }
 
         # Create Standard ZIP
-        $standardDist = Join-Path (Get-Location) "dist\YTSage"
+        $standardDist = Join-Path (Get-Location) "dist\SageDLP"
         if (Test-Path $standardDist) {
-          $stdZip = "artifacts\YTSage-v$version-portable.zip"
+          $stdZip = "artifacts\SageDLP-v$version-portable.zip"
           if (Test-Path $stdZip) { Remove-Item $stdZip -Force }
           Compress-Archive -Path "$standardDist\*" -DestinationPath $stdZip -CompressionLevel Optimal
           Write-Host "Created: $(Resolve-Path $stdZip)"
@@ -426,9 +426,9 @@ jobs:
         }
 
         # Create FFmpeg ZIP
-        $ffmpegDist = Join-Path (Get-Location) "dist\YTSage-FFmpeg"
+        $ffmpegDist = Join-Path (Get-Location) "dist\SageDLP-FFmpeg"
         if (Test-Path $ffmpegDist) {
-          $ffZip = "artifacts\YTSage-v$version-ffmpeg-portable.zip"
+          $ffZip = "artifacts\SageDLP-v$version-ffmpeg-portable.zip"
           if (Test-Path $ffZip) { Remove-Item $ffZip -Force }
           Compress-Archive -Path "$ffmpegDist\*" -DestinationPath $ffZip -CompressionLevel Optimal
           Write-Host "Created: $(Resolve-Path $ffZip)"
@@ -461,19 +461,19 @@ jobs:
         $env:Path = "C:\Program Files (x86)\Inno Setup 6;$env:Path"
         
         # Compile
-        $exeName = "YTSage-v$version.exe"
+        $exeName = "SageDLP-v$version.exe"
         Write-Host "Compiling installer for $exeName..."
         
         # Note: Setup-windows.iss is in setup-scripts/
         # OutputDir is ..\artifacts (relative to script) -> repo/artifacts
-        # SourceDir is ..\dist\YTSage (relative to script) -> repo/dist/YTSage
+        # SourceDir is ..\dist\SageDLP (relative to script) -> repo/dist/SageDLP
         
-        iscc /DMyAppVersion="$version" /DMyAppExeName="$exeName" /DSourceDir="..\dist\YTSage" "setup-scripts\Setup-windows.iss"
+        iscc /DMyAppVersion="$version" /DMyAppExeName="$exeName" /DSourceDir="..\dist\SageDLP" "setup-scripts\Setup-windows.iss"
         
         # Compile FFmpeg Installer
-        $exeNameFFmpeg = "YTSage-v$version-ffmpeg.exe"
+        $exeNameFFmpeg = "SageDLP-v$version-ffmpeg.exe"
         Write-Host "Compiling FFmpeg installer for $exeNameFFmpeg..."
-        iscc /DMyAppVersion="$version" /DMyAppExeName="$exeNameFFmpeg" /DSourceDir="..\dist\YTSage-FFmpeg" "setup-scripts\Setup-windows-ffmpeg.iss"
+        iscc /DMyAppVersion="$version" /DMyAppExeName="$exeNameFFmpeg" /DSourceDir="..\dist\SageDLP-FFmpeg" "setup-scripts\Setup-windows-ffmpeg.iss"
 
         if ($LASTEXITCODE -eq 0) {
           Write-Host "Installer compilation successful."
@@ -486,11 +486,11 @@ jobs:
       uses: softprops/action-gh-release@v2
       with:
         tag_name: v${{ steps.get_version.outputs.VERSION }}
-        name: YTSage v${{ steps.get_version.outputs.VERSION }}
+        name: SageDLP v${{ steps.get_version.outputs.VERSION }}
         draft: true
         prerelease: false
         body: |
-          # YTSage v${{ steps.get_version.outputs.VERSION }}
+          # SageDLP v${{ steps.get_version.outputs.VERSION }}
           
           **Release Date**: ${{ github.event.head_commit.timestamp }}
         files: |

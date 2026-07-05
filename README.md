@@ -1,15 +1,15 @@
 <div align="center">
 
-<img src="branding/svg/ytsage-wordmark.svg" width="400" alt="ytsage-wordmark">
-<img src="branding/screenshots/main.png" width="800" alt="YTSage Interface"/>
+<img src="branding/svg/sage-dlp-wordmark.svg" width="400" alt="sage-dlp-wordmark">
+<img src="branding/screenshots/main.png" width="800" alt="SageDLP Interface"/>
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-1f2937?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/downloads/)
-[![PyPI Downloads](https://img.shields.io/pepy/dt/ytsage?color=1f2937&style=for-the-badge&label=downloads&logo=python&logoColor=white)](https://pepy.tech/project/ytsage)
-[![GitHub Downloads](https://img.shields.io/github/downloads/oop7/YTSage/total?color=1f2937&style=for-the-badge&label=downloads&logo=github&logoColor=white)](https://github.com/oop7/YTSage/releases)
+[![PyPI Downloads](https://img.shields.io/pepy/dt/sage-dlp?color=1f2937&style=for-the-badge&label=downloads&logo=python&logoColor=white)](https://pepy.tech/project/sage-dlp)
+[![GitHub Downloads](https://img.shields.io/github/downloads/oop7/SageDLP/total?color=1f2937&style=for-the-badge&label=downloads&logo=github&logoColor=white)](https://github.com/oop7/SageDLP/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-1f2937?style=for-the-badge&logo=opensource&logoColor=white)](https://opensource.org/licenses/MIT)
-[![Supported Platforms](https://img.shields.io/badge/platform-cross--platform-1f2937?style=for-the-badge&logo=github&logoColor=white)](https://github.com/oop7/YTSage/releases)
-[![GitHub Stars](https://img.shields.io/github/stars/oop7/YTSage?color=c90000&style=for-the-badge&logo=github&logoColor=white)](https://github.com/oop7/YTSage/stargazers)
-[![PyPI version](https://img.shields.io/pypi/v/ytsage?color=c90000&style=for-the-badge&logo=pypi&logoColor=white)](https://pypi.org/project/ytsage/)
+[![Supported Platforms](https://img.shields.io/badge/platform-cross--platform-1f2937?style=for-the-badge&logo=github&logoColor=white)](https://github.com/oop7/SageDLP/releases)
+[![GitHub Stars](https://img.shields.io/github/stars/oop7/SageDLP?color=c90000&style=for-the-badge&logo=github&logoColor=white)](https://github.com/oop7/SageDLP/stargazers)
+[![PyPI version](https://img.shields.io/pypi/v/sage-dlp?color=c90000&style=for-the-badge&logo=pypi&logoColor=white)](https://pypi.org/project/sage-dlp/)
 [![GitHub Sponsors](https://img.shields.io/github/sponsors/oop7?color=c90000&style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/oop7)
 
 **Modern YouTube downloader with a clean PySide6 interface.**  
@@ -46,10 +46,10 @@ English: [EN](README.md)
 
 ---
 
-<a id="why-ytsage"></a>
-## ❓ Why YTSage?
+<a id="why-sage-dlp"></a>
+## ❓ Why SageDLP?
 
-YTSage is designed for users who want a **simple yet powerful YouTube downloader**. Unlike other tools, it offers:
+SageDLP is designed for users who want a **simple yet powerful YouTube downloader**. Unlike other tools, it offers:
 
 - A modern and clean PySide6 interface
 - One-click downloads for video, audio, and subtitles
@@ -80,17 +80,17 @@ YTSage is designed for users who want a **simple yet powerful YouTube downloader
 
 ### ⚡ Quick Install (Recommended)
 
-Install YTSage via PyPI:
+Install SageDLP via PyPI:
 
 ```bash
-pip install ytsage
+pip install sage-dlp
 ```
 
 <details>
 <summary>🔄 Update existing installation</summary>
 
 ```bash
-pip install --upgrade ytsage
+pip install --upgrade sage-dlp
 ```
 
 </details>
@@ -98,12 +98,12 @@ pip install --upgrade ytsage
 Then launch the application:
 
 ```bash
-ytsage
+sage-dlp
 ```
 
 ### 📦 Pre-built Executables
 
-> [👉 Download Latest Release](https://github.com/oop7/YTSage/releases/latest)
+> [👉 Download Latest Release](https://github.com/oop7/SageDLP/releases/latest)
 
 #### 🪟 Windows
 
@@ -118,7 +118,7 @@ ytsage
 <summary>🛠️ Installation Steps</summary>
 
 1. **EXE Installer (`.exe`)**: Double-click the file and follow the setup wizard.
-2. **Portable Version (`.zip`)**: Extract the archive to your desired location and launch `ytsage.exe`.
+2. **Portable Version (`.zip`)**: Extract the archive to your desired location and launch `sage-dlp.exe`.
 3. **FFmpeg Included**: Choose versions with FFmpeg included if you don't have FFmpeg installed on your system.
 </details>
 
@@ -136,21 +136,21 @@ ytsage
 
 - **DEB (`.deb`)**:
   ```bash
-  sudo dpkg -i ytsage_*.deb
+  sudo dpkg -i sage-dlp_*.deb
   sudo apt-get install -f # Fix missing dependencies if needed
   ```
 - **RPM (`.rpm`)**:
   ```bash
-  sudo rpm -i ytsage-*.rpm
+  sudo rpm -i sage-dlp-*.rpm
   ```
 - **AppImage (`.AppImage`)**:
   ```bash
-  chmod +x YTSage-*.AppImage
-  ./YTSage-*.AppImage
+  chmod +x SageDLP-*.AppImage
+  ./SageDLP-*.AppImage
   ```
 - **Flatpak**: Follow instructions on Flathub or run:
   ```bash
-  flatpak install flathub io.github.oop7.ytsage
+  flatpak install flathub io.github.oop7.sage-dlp
   ```
 </details>
 
@@ -164,8 +164,8 @@ ytsage
 <details>
 <summary>🛠️ Installation Steps</summary>
 
-- **DMG Installer (`.dmg`)**: Double-click to mount, then drag `YTSage.app` to your Applications folder.
-- **Application Archive (`.zip`)**: Extract the zip and move `YTSage.app` to your Applications folder.
+- **DMG Installer (`.dmg`)**: Double-click to mount, then drag `SageDLP.app` to your Applications folder.
+- **Application Archive (`.zip`)**: Extract the zip and move `SageDLP.app` to your Applications folder.
 
 *Note: If you encounter an "Application is damaged" error, see the macOS troubleshooting section below.*
 </details>
@@ -178,8 +178,8 @@ ytsage
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/oop7/YTSage.git
-cd YTSage
+git clone https://github.com/oop7/SageDLP.git
+cd SageDLP
 ```
 
 ### 2. Install dependencies
@@ -199,7 +199,7 @@ pip install .
 ### 3. Run the application
 
 ```bash
-python -m ytsage.main
+python -m sage-dlp.main
 ```
 
 </details>
@@ -234,7 +234,7 @@ python -m ytsage.main
 <details>
 <summary>🎯 Basic Usage</summary>
 
-1. **Launch YTSage**
+1. **Launch SageDLP**
 2. **Paste YouTube URL** (or use "Paste URL" button)
 3. **Click "Analyze"**
 4. **Select Format:**
@@ -270,7 +270,7 @@ python -m ytsage.main
 <details>
 <summary>🌍 Generic Mode for Non-YouTube Sites</summary>
 
-Use Generic Mode when you want YTSage to accept URLs from sites supported by yt-dlp, such as Dailymotion, CBC Gem, TikTok, and others.
+Use Generic Mode when you want SageDLP to accept URLs from sites supported by yt-dlp, such as Dailymotion, CBC Gem, TikTok, and others.
 
 How to use it:
 
@@ -282,7 +282,7 @@ How to use it:
 
 Notes:
 
-- Generic mode only changes the URL validation inside YTSage. The target site must still be supported by your installed version of yt-dlp.
+- Generic mode only changes the URL validation inside SageDLP. The target site must still be supported by your installed version of yt-dlp.
 - Some sites require cookies, login sessions, proxy, or extra yt-dlp arguments depending on the extractor.
 - If a site fails, update yt-dlp from the built-in updater tab first before reporting an issue.
 
@@ -328,7 +328,7 @@ Notes:
      c. Create a file named `cookies.txt` and paste cookies
      d. Select the `cookies.txt` file in the app
 - **Proxy Support:** Use a proxy server for downloads, e.g., `http://<proxy-server>:<port>`
-- **Generic Mode:** Allows YTSage to analyze and download from non-YouTube sites supported by yt-dlp. Enable from **Download Settings → Generic Mode**.
+- **Generic Mode:** Allows SageDLP to analyze and download from non-YouTube sites supported by yt-dlp. Enable from **Download Settings → Generic Mode**.
 
 </details>
 
@@ -348,7 +348,7 @@ Notes:
 <details>
 <summary>🌍 Localization</summary>
 
-YTSage supports **14 languages** for global accessibility. Select your preferred language in **Custom Options → Language**.
+SageDLP supports **14 languages** for global accessibility. Select your preferred language in **Custom Options → Language**.
 
 ### Supported Languages
 
@@ -396,8 +396,8 @@ YTSage supports **14 languages** for global accessibility. Select your preferred
   - **Invalid URLs:** Ensure the URL is correct and from a supported platform.
   - **Premium Content:** Requires a YouTube Premium subscription.
   - **Copyright Blocks:** Content is blocked due to copyright restrictions.
-- **Video and Audio Files separate after download:** This happens when FFmpeg is missing or not detected. YTSage requires FFmpeg to merge high-quality video and audio streams.
-  - **Solution:** Ensure FFmpeg is installed and accessible in your system's PATH. For Windows users, the easiest option is to download the `YTSage-v<version>-ffmpeg.exe` file, which comes bundled with FFmpeg.
+- **Video and Audio Files separate after download:** This happens when FFmpeg is missing or not detected. SageDLP requires FFmpeg to merge high-quality video and audio streams.
+  - **Solution:** Ensure FFmpeg is installed and accessible in your system's PATH. For Windows users, the easiest option is to download the `SageDLP-v<version>-ffmpeg.exe` file, which comes bundled with FFmpeg.
 
 ---
 
@@ -409,7 +409,7 @@ Some antivirus software may flag `.exe` files as false positives. This is a **kn
 - Antivirus heuristics can mistakenly identify packaged executables as suspicious.
 
 **Safe Alternatives:**
-- ✅ **Use pip install:** `pip install ytsage` (Recommended)
+- ✅ **Use pip install:** `pip install sage-dlp` (Recommended)
 - ✅ **Build from Source**: by following this [guide](.github/CI_CD_README.md)
 - ✅ **Whitelist the app** in your antivirus software.
 
@@ -421,28 +421,28 @@ If you see this error on macOS Sonoma or newer, you need to remove the quarantin
     ```bash
     xattr -d com.apple.quarantine 
     ```
-3.  **Drag the `YTSage.app` file** from your Finder window and drop it directly into the Terminal window. This will automatically paste the correct file path.
+3.  **Drag the `SageDLP.app` file** from your Finder window and drop it directly into the Terminal window. This will automatically paste the correct file path.
 4.  **Press Enter** to run the command.
-5.  **Try opening YTSage.app again.** It should now launch correctly.
+5.  **Try opening SageDLP.app again.** It should now launch correctly.
 
 ---
 
 #### **Config Locations (Advanced)**
-- **Windows:** `%LOCALAPPDATA%\YTSage`
-- **macOS:** `~/Library/Application Support/YTSage`
-- **Linux:** `~/.local/share/YTSage`
+- **Windows:** `%LOCALAPPDATA%\SageDLP`
+- **macOS:** `~/Library/Application Support/SageDLP`
+- **Linux:** `~/.local/share/SageDLP`
 
 </details>
 
 <a id="sponsor"></a>
 ## 💖 Sponsor
 
-If YTSage saves you time, please consider sponsoring the project. Sponsoring helps cover development time, testing across all platforms, and future improvements.
+If SageDLP saves you time, please consider sponsoring the project. Sponsoring helps cover development time, testing across all platforms, and future improvements.
 
 - GitHub Sponsors: https://github.com/sponsors/oop7
 - Sponsorship link is also available directly in the app via the About dialog.
 
-[![Sponsor YTSage](https://img.shields.io/badge/Sponsor-YTSage-EA4AAA?style=for-the-badge&logo=github&logoColor=white)](https://github.com/sponsors/oop7)
+[![Sponsor SageDLP](https://img.shields.io/badge/Sponsor-SageDLP-EA4AAA?style=for-the-badge&logo=github&logoColor=white)](https://github.com/sponsors/oop7)
 
 <a id="contributing"></a>
 ## 👥 Contributing
@@ -467,20 +467,20 @@ We welcome contributions! Here’s how you can help:
 ### 🌍 Contributing Translations
 
 - Update the relevant localized README file (e.g., `readme-translations/README.fr.md`)
-- Keep app strings synced by editing `ytsage/languages/<code>.json`
+- Keep app strings synced by editing `sage-dlp/languages/<code>.json`
 - If your language is missing, start from `README.md` and create `readme-translations/README.<code>.md`
 
 <details>
 <summary>📂 Project Structure</summary>
 
-## YTSage - Project Structure
+## SageDLP - Project Structure
 
-This document describes the organized folder structure of YTSage.
+This document describes the organized folder structure of SageDLP.
 
 ### 📁 Project Structure
 
 ```
-YTSage/
+SageDLP/
 ├── 📁 .github/                   # GitHub configuration
 │   ├── 📁 ISSUE_TEMPLATE/         # Issue templates
 │   │   └── 🐛-bug-report.md       # Bug report template
@@ -498,7 +498,7 @@ YTSage/
 ├── 📄 pyproject.toml             # Project metadata and dependencies
 ├── 📄 README.md                  # Project documentation
 ├── 📄 requirements.txt           # Python dependencies (dev)
-└── 📁 ytsage/                    # Source package
+└── 📁 sage-dlp/                    # Source package
     ├── 📁 assets/                # Runtime assets
     │   ├── 📁 Icon/              # App icons
     │   └── 📁 sound/             # Sound files
@@ -509,19 +509,19 @@ YTSage/
     │   └── ...                   # Other languages
     ├── 📁 core/                  # Core business logic
     │   ├── 📄 __init__.py        # Core package init
-    │   ├── 📄 ytsage_deno.py     # Deno integration
-    │   ├── 📄 ytsage_downloader.py # Download functionality
-    │   ├── 📄 ytsage_ffmpeg.py   # FFmpeg integration
-    │   ├── 📄 ytsage_utils.py    # Utility functions
-    │   └── 📄 ytsage_yt_dlp.py   # yt-dlp integration
+    │   ├── 📄 sage-dlp_deno.py     # Deno integration
+    │   ├── 📄 sage-dlp_downloader.py # Download functionality
+    │   ├── 📄 sage-dlp_ffmpeg.py   # FFmpeg integration
+    │   ├── 📄 sage-dlp_utils.py    # Utility functions
+    │   └── 📄 sage-dlp_yt_dlp.py   # yt-dlp integration
     ├── 📁 gui/                   # UI components
     │   ├── 📄 __init__.py        # GUI package init
-    │   ├── 📄 ytsage_gui_main.py # Main app window
-    │   └── 📁 ytsage_gui_dialogs/ # Dialog classes
+    │   ├── 📄 sage-dlp_gui_main.py # Main app window
+    │   └── 📁 sage-dlp_gui_dialogs/ # Dialog classes
     ├── 📁 utils/                 # Utility modules
     │   ├── 📄 __init__.py        # Utils package init
-    │   ├── 📄 ytsage_config_manager.py # Config management
-    │   └── 📄 ytsage_logger.py   # Logging utilities
+    │   ├── 📄 sage-dlp_config_manager.py # Config management
+    │   └── 📄 sage-dlp_logger.py   # Logging utilities
     ├── 📄 __init__.py            # Package entry point
     └── 📄 main.py                # Main execution script
 ```
@@ -534,11 +534,11 @@ YTSage/
 
 ## Star History
 
-<a href="https://www.star-history.com/#oop7/YTSage&Date">
+<a href="https://www.star-history.com/#oop7/SageDLP&Date">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=oop7/YTSage&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=oop7/YTSage&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=oop7/YTSage&type=Date" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=oop7/SageDLP&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=oop7/SageDLP&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=oop7/SageDLP&type=Date" />
  </picture>
 </a>
 

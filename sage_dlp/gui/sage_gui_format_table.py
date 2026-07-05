@@ -1,0 +1,660 @@
+from typing import TYPE_CHECKING, cast
+
+from PySide6.QtCore import QObject, Qt, Signal
+from PySide6.QtGui import QColor, QFontMetrics
+from PySide6.QtWidgets import QCheckBox, QHBoxLayout, QHeaderView, QSizePolicy, QTableWidget, QTableWidgetItem, QWidget
+
+from ..utils.sage_localization import _
+
+if TYPE_CHECKING:
+    from .sage_gui_main import SageApp
+
+
+class FormatSignals(QObject):
+    format_update = Signal(list)
+
+
+class FormatTableMixin:
+    def _calculate_column_width(self, label: str, min_width: int, padding: int) -> int:
+        """Calculate responsive column width based on header text length."""
+        self = cast("SageApp", self)
+        font_metrics = QFontMetrics(self.format_table.horizontalHeader().font())
+        text_width = font_metrics.horizontalAdvance(label)
+        return max(text_width + padding, min_width)
+
+    def _get_audio_codec_display(self, format_info: dict) -> str:
+        """
+        Generate a display string for audio codec information.
+        Highlights EAC3/AC3 and other surround sound formats with channel info.
+        """
+        acodec = format_info.get("acodec")
+        if not acodec or acodec == "none":
+            return "N/A"
+
+        channels = format_info.get("audio_channels")
+        abr = format_info.get("abr")
+
+        # Build codec string
+        codec_str = str(acodec)
+
+        # Add channel info for surround sound formats
+        if channels:
+            codec_str += f" ({channels}ch)"
+
+        # Add bitrate if available
+        if abr and isinstance(abr, (int, float)):
+            if abr >= 1000:
+                codec_str += f" {abr/1000:.1f}Mbps"
+            else:
+                codec_str += f" {int(abr)}kbps"
+
+        return codec_str
+
+    def _apply_column_widths(self, header_labels: list[str], is_playlist_mode: bool = False) -> None:
+        """Apply responsive column widths to format table."""
+        self = cast("SageApp", self)
+
+        if is_playlist_mode:
+            # Playlist mode: 6 columns
+            configs = [
+                {"min_width": 70, "padding": 40},   # Select
+                {"min_width": 100, "padding": 30},  # Quality
+                {"min_width": 100, "padding": 30},  # Resolution
+                {"min_width": 60, "padding": 30},   # FPS
+                {"min_width": 60, "padding": 30},   # HDR
+                {"min_width": 100, "padding": 30},  # Audio
+            ]
+
+            self.format_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Fixed)
+            calculated_width = self._calculate_column_width(header_labels[0], configs[0]["min_width"], configs[0]["padding"])
+            self.format_table.setColumnWidth(0, calculated_width)
+
+            # Remaining columns stretch
+            for i in range(1, 6):
+                self.format_table.horizontalHeader().setSectionResizeMode(i, QHeaderView.ResizeMode.Stretch)
+        else:
+            # Normal mode: 9 columns
+            configs = [
+                {"min_width": 70, "padding": 40, "stretch": False},   # Select - fixed
+                {"min_width": 100, "padding": 30, "stretch": True},   # Quality - stretch
+                {"min_width": 85, "padding": 30, "stretch": False},   # Extension - fixed
+                {"min_width": 100, "padding": 30, "stretch": True},   # Resolution - stretch
+                {"min_width": 90, "padding": 30, "stretch": True},    # File Size - stretch
+                {"min_width": 100, "padding": 30, "stretch": True},   # Codec - stretch
+                {"min_width": 100, "padding": 30, "stretch": True},   # Audio - stretch
+                {"min_width": 60, "padding": 30, "stretch": False},   # FPS - fixed
+                {"min_width": 60, "padding": 30, "stretch": False},   # HDR - fixed
+            ]
+
+            # Apply column widths with mixed fixed and stretch modes
+            for col_index, (label, config) in enumerate(zip(header_labels, configs)):
+                calculated_width = self._calculate_column_width(label, config["min_width"], config["padding"])
+
+                if config["stretch"]:
+                    # Stretchable columns for flexible content
+                    self.format_table.horizontalHeader().setSectionResizeMode(col_index, QHeaderView.ResizeMode.Stretch)
+                else:
+                    # Fixed columns for consistent sizing
+                    self.format_table.horizontalHeader().setSectionResizeMode(col_index, QHeaderView.ResizeMode.Fixed)
+                    self.format_table.setColumnWidth(col_index, calculated_width)
+
+    def setup_format_table(self) -> QTableWidget:
+        self = cast("SageApp", self)  # for autocompletion and type inference.
+
+        self.format_signals = FormatSignals()
+        # Format table with improved styling
+        self.format_table = QTableWidget()
+        self.format_table.setColumnCount(9)
+
+        # Get translated header labels
+        header_labels = [
+            _("formats.select"),
+            _("formats.quality"),
+            _("formats.extension"),
+            _("formats.resolution"),
+            _("formats.file_size"),
+            _("formats.codec"),
+            _("formats.audio"),
+            _("formats.fps"),
+            _("formats.hdr"),
+        ]
+        self.format_table.setHorizontalHeaderLabels(header_labels)
+
+        # Enable alternating row colors
+        self.format_table.setAlternatingRowColors(True)
+
+        # Apply responsive column widths
+        self._apply_column_widths(header_labels, is_playlist_mode=False)
+
+        # Set vertical header (row numbers) visible to false
+        self.format_table.verticalHeader().setVisible(False)
+
+        # Set selection mode to no selection (since we're using checkboxes)
+        self.format_table.setSelectionMode(QTableWidget.SelectionMode.NoSelection)
+
+        # Disable editing to prevent the selection box on double-click
+        self.format_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+
+        self.format_table.setStyleSheet(
+            """
+            QTableWidget {
+                background-color: #ffffff;
+                border: 2px solid #cbd5e1;
+                border-radius: 8px;
+                gridline-color: #e2e8f0;
+            }
+            QTableWidget::item {
+                padding: 5px;
+                border-bottom: 1px solid #e2e8f0;
+                color: #0f172a;
+            }
+            QTableWidget::item:selected {
+                background-color: #eff4fa;
+            }
+            QHeaderView::section {
+                background-color: #f1f5f9;
+                padding: 5px;
+                border: none;
+                border-bottom: 2px solid #2a4a82;
+                font-weight: 600;
+                color: #0f172a;
+            }
+            /* Style alternating rows */
+            QTableWidget::item:alternate {
+                background-color: #f1f5f9;
+            }
+            QTableWidget::item {
+                background-color: #ffffff;
+            }
+            QCheckBox::indicator {
+                width: 16px;
+                height: 16px;
+                border-radius: 8px;
+            }
+            QCheckBox::indicator:unchecked {
+                border: 2px solid #cbd5e1;
+                background: #ffffff;
+            }
+            QCheckBox::indicator:checked {
+                border: 2px solid #2a4a82;
+                background: #2a4a82;
+            }
+            QWidget {
+                background-color: transparent;
+            }
+        """
+        )
+
+        # Store format checkboxes and formats
+        self.format_checkboxes = []
+        self.all_formats = []
+        self._row_format_type = []  # Track format type per row: 'video' or 'audio'
+        self._table_built = False  # Track if table has been built with current formats
+
+        # Set table size policies
+        self.format_table.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+
+        # Set minimum and maximum heights
+        self.format_table.setMinimumHeight(200)
+
+        # Connect the signal
+        self.format_signals.format_update.connect(self._update_format_table)
+
+        return self.format_table
+
+    def filter_formats(self) -> None:
+        self = cast("SageApp", self)  # for autocompletion and type inference.
+
+        if not hasattr(self, "all_formats") or not self.all_formats:
+            return
+
+        # Check if we need to rebuild the table (first time or formats changed)
+        if not self._table_built:
+            self._build_full_format_table()
+            return
+
+        # Use row visibility for fast filtering instead of rebuilding table
+        show_video = hasattr(self, "video_button") and self.video_button.isChecked()  # type: ignore[reportAttributeAccessIssue]
+        show_audio = hasattr(self, "audio_button") and self.audio_button.isChecked()  # type: ignore[reportAttributeAccessIssue]
+
+        for row, format_type in enumerate(self._row_format_type):
+            if format_type == "video":
+                self.format_table.setRowHidden(row, not show_video)
+            else:  # audio
+                self.format_table.setRowHidden(row, not show_audio)
+
+    def _build_full_format_table(self) -> None:
+        """Build the complete format table once with all formats."""
+        self = cast("SageApp", self)  # for autocompletion and type inference.
+
+        # Clear current table
+        self.format_table.setRowCount(0)
+        self.format_checkboxes.clear()
+        self._row_format_type.clear()
+
+        # Separate and filter formats
+        video_formats = [f for f in self.all_formats if f.get("vcodec") != "none" and f.get("filesize") is not None]
+        audio_formats = [
+            f
+            for f in self.all_formats
+            if (f.get("vcodec") == "none" or "audio only" in str(f.get("format_note") or "").lower())
+            and f.get("acodec") != "none"
+            # Removed filesize requirement - many audio-only formats (including EAC3/AC3) may not have filesize in yt-dlp output
+            # Include all audio formats to detect EAC3/AC3 and other surround sound codecs
+        ]
+
+        # Sort formats by quality
+        def get_quality(f):
+            if f.get("vcodec") != "none":
+                resolution = f.get("resolution", "0x0")
+                if resolution is None or not isinstance(resolution, str):
+                    return 0
+                try:
+                    res = resolution.split("x")[-1]
+                    return int(res)
+                except (ValueError, IndexError):
+                    return 0
+            else:
+                abr = f.get("abr") or 0
+                return abr if isinstance(abr, (int, float)) else 0
+
+        video_formats.sort(key=get_quality, reverse=True)
+        audio_formats.sort(key=get_quality, reverse=True)
+
+        # Combine: video first, then audio (maintains logical grouping)
+        all_filtered = [(f, "video") for f in video_formats] + [(f, "audio") for f in audio_formats]
+
+        # Build table with format type tracking
+        self.format_table.setVisible(False)
+        self._populate_format_table(all_filtered)
+        self._table_built = True
+
+        from ..utils.sage_config_manager import ConfigManager
+        default_video_quality = ConfigManager.get("default_video_quality")
+
+        # Auto-select the default or best format
+        if self.format_checkboxes:
+            found_default = False
+            if default_video_quality:
+                # Try to find a video format with the requested height (e.g. '1080')
+                target_height = str(default_video_quality)
+                # the formats are sorted by quality, so the first match is typically the best one for that height
+                for idx, (f, fmt_type) in enumerate(all_filtered):
+                    if fmt_type == "video":
+                        res = str(f.get("resolution", ""))
+                        if res.endswith(f"x{target_height}") or target_height in res:
+                            self.format_checkboxes[idx].setChecked(True)
+                            self.handle_checkbox_click(self.format_checkboxes[idx])
+                            found_default = True
+                            break
+
+            if not found_default:
+                # Fallback to the first available format (which is the best quality since it's sorted)
+                self.format_checkboxes[0].setChecked(True)
+                self.handle_checkbox_click(self.format_checkboxes[0])
+
+        # Apply initial visibility based on current button states
+        self.filter_formats()
+
+        # Animate table appearance
+        if hasattr(self, "animate_widget_fade_in"):
+            self.animate_widget_fade_in(self.format_table)
+        else:
+            self.format_table.setVisible(True)
+
+    def _populate_format_table(self, formats_with_types: list) -> None:
+        """Populate the format table with formats and their types."""
+        self = cast("SageApp", self)  # for autocompletion and type inference.
+
+        is_playlist_mode = hasattr(self, "is_playlist") and self.is_playlist  # type: ignore[reportAttributeAccessIssue]
+
+        # Configure columns based on mode
+        if is_playlist_mode:
+            self.format_table.setColumnCount(6)
+            header_labels = [_("formats.select"), _("formats.quality"), _("formats.resolution"), _("formats.fps"), _("formats.hdr"), _("formats.audio")]
+            self.format_table.setHorizontalHeaderLabels(header_labels)
+
+            # Configure column visibility and resizing for playlist mode
+            self.format_table.setColumnHidden(6, True)
+            self.format_table.setColumnHidden(7, True)
+            self.format_table.setColumnHidden(8, True)
+
+            # Apply responsive column widths for playlist mode
+            self._apply_column_widths(header_labels, is_playlist_mode=True)
+
+        else:
+            self.format_table.setColumnCount(9)
+            header_labels = [
+                _("formats.select"),
+                _("formats.quality"),
+                _("formats.extension"),
+                _("formats.resolution"),
+                _("formats.file_size"),
+                _("formats.codec"),
+                _("formats.audio"),
+                _("formats.fps"),
+                _("formats.hdr"),
+            ]
+            self.format_table.setHorizontalHeaderLabels(header_labels)
+            self._apply_column_widths(header_labels, is_playlist_mode=False)
+
+        for f, format_type in formats_with_types:
+            row = self.format_table.rowCount()
+            self.format_table.insertRow(row)
+            self._row_format_type.append(format_type)
+
+            # Create checkbox widget
+            checkbox = QCheckBox()
+            checkbox.setStyleSheet("QCheckBox { margin-left: 8px; }")
+            checkbox.format_id = f["format_id"]
+            checkbox.is_audio_only = f.get("vcodec") == "none"
+            checkbox.has_audio = f.get("acodec") != "none"
+            checkbox.clicked.connect(lambda checked, cb=checkbox: self.handle_checkbox_click(cb))
+            self.format_checkboxes.append(checkbox)
+
+            # Create a container widget for the checkbox
+            checkbox_container = QWidget()
+            checkbox_layout = QHBoxLayout(checkbox_container)
+            checkbox_layout.addWidget(checkbox)
+            checkbox_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            checkbox_layout.setContentsMargins(0, 0, 0, 0)
+            self.format_table.setCellWidget(row, 0, checkbox_container)
+
+            # Quality label with color coding
+            quality_label = self.get_quality_label(f)
+            if is_playlist_mode and f.get("vcodec") != "none":
+                quality_label = f"≤ {quality_label}"
+
+            quality_item = QTableWidgetItem(quality_label)
+            # Color-code quality using numeric level from same source function
+            quality_level = self._get_quality_level(f)
+            if quality_level == 0:
+                quality_item.setForeground(QColor("#00cc66"))  # Green for best
+            elif quality_level == 1:
+                quality_item.setForeground(QColor("#22aa44"))  # Light green for high
+            elif quality_level == 2:
+                quality_item.setForeground(QColor("#ffaa00"))  # Orange for medium
+            else:
+                quality_item.setForeground(QColor("#ff5555"))  # Red for low
+            self.format_table.setItem(row, 1, quality_item)
+
+            # Resolution
+            resolution = f.get("resolution") or "N/A"
+            if not isinstance(resolution, str):
+                resolution = str(resolution)
+
+            if is_playlist_mode and f.get("vcodec") != "none" and resolution != "N/A":
+                resolution = f"≤ {resolution}"
+
+            if is_playlist_mode:
+                # Column 2 for playlist mode: Resolution
+                self.format_table.setItem(row, 2, QTableWidgetItem(resolution))
+
+                # Column 3: FPS (Frame Rate)
+                fps_value = f.get("fps")
+                if fps_value is not None and fps_value >= 1:
+                    fps_text = f"{fps_value:.0f}fps"
+                else:
+                    fps_text = "N/A"
+                fps_item = QTableWidgetItem(fps_text)
+                if fps_value and fps_value >= 60:
+                    fps_item.setForeground(QColor("#00ff00"))
+                elif fps_value and fps_value >= 30:
+                    fps_item.setForeground(QColor("#ffaa00"))
+                elif fps_value and fps_value >= 1:
+                    fps_item.setForeground(QColor("#ff5555"))
+                else:
+                    fps_item.setForeground(QColor("#64748b"))
+                self.format_table.setItem(row, 3, fps_item)
+
+                # Column 4: HDR
+                if f.get("vcodec") == "none":
+                    hdr_text = "N/A"
+                    hdr_item = QTableWidgetItem(hdr_text)
+                    hdr_item.setForeground(QColor("#64748b"))
+                else:
+                    hdr_value = f.get("dynamic_range")
+                    if hdr_value and hdr_value != "SDR":
+                        hdr_text = hdr_value
+                        hdr_item = QTableWidgetItem(hdr_text)
+                        hdr_item.setForeground(QColor("#00ffff"))
+                    else:
+                        hdr_text = "SDR"
+                        hdr_item = QTableWidgetItem(hdr_text)
+                        hdr_item.setForeground(QColor("#64748b"))
+                self.format_table.setItem(row, 4, hdr_item)
+            else:
+                # Extension for normal mode (column 2)
+                extension = str(f.get("ext") or "")
+                self.format_table.setItem(row, 2, QTableWidgetItem(extension.upper()))
+
+            # Audio Status column
+            needs_audio = f.get("acodec") == "none" and f.get("vcodec") != "none"
+            acodec = f.get("acodec")
+
+            # Enhanced audio status with support for surround sound formats (EAC3/AC3)
+            if needs_audio:
+                audio_status = _("formats.will_merge_audio")
+                audio_color = QColor("#ffa500")
+            elif f.get("vcodec") != "none":
+                # Video format with audio
+                if acodec in ["ac3", "eac3"]:
+                    # Highlight surround sound codecs
+                    channels = f.get("audio_channels", "")
+                    if channels:
+                        audio_status = f"{_('formats.has_audio')} - {acodec.upper()} {channels}ch"
+                    else:
+                        audio_status = f"{_('formats.has_audio')} - {acodec.upper()}"
+                    audio_color = QColor("#00ccff")  # Cyan for surround sound
+                else:
+                    audio_status = _("formats.has_audio")
+                    audio_color = QColor("#00cc00")
+            else:
+                # Audio-only format
+                if acodec in ["ac3", "eac3"]:
+                    # Highlight surround sound audio-only
+                    channels = f.get("audio_channels", "")
+                    if channels:
+                        audio_status = f"{acodec.upper()} {channels}ch"
+                    else:
+                        audio_status = acodec.upper()
+                    audio_color = QColor("#00ccff")  # Cyan for surround sound
+                else:
+                    audio_status = _("formats.audio_only")
+                    audio_color = QColor("#64748b")
+
+            audio_item = QTableWidgetItem(audio_status)
+            audio_item.setForeground(audio_color)
+            audio_column_index = 5 if is_playlist_mode else 6
+            self.format_table.setItem(row, audio_column_index, audio_item)
+
+            # Populate columns only shown in non-playlist mode
+            if not is_playlist_mode:
+                # Column 3: Resolution
+                self.format_table.setItem(row, 3, QTableWidgetItem(resolution))
+
+                # Column 4: File Size
+                filesize = f"{f.get('filesize', 0) / 1024 / 1024:.2f} MB"
+                self.format_table.setItem(row, 4, QTableWidgetItem(filesize))
+
+                # Column 5: Codec
+                if f.get("vcodec") == "none":
+                    # Audio-only format - display codec with channel info
+                    codec = str(f.get("acodec") or "N/A")
+                    # Add audio channel information if available (e.g., for 5.1 detection)
+                    channels = f.get("audio_channels")
+                    if channels:
+                        codec += f" ({channels}ch)"
+                else:
+                    # Video format - display video codec and audio codec if present
+                    codec = str(f.get("vcodec") or "N/A")
+                    if f.get("acodec") != "none":
+                        acodec = str(f.get("acodec") or "N/A")
+                        # Add audio channel info for video with audio
+                        channels = f.get("audio_channels")
+                        if channels:
+                            acodec += f" ({channels}ch)"
+                        codec += f" / {acodec}"
+                self.format_table.setItem(row, 5, QTableWidgetItem(codec))
+
+                # Column 7: FPS (Frame Rate)
+                fps_value = f.get("fps")
+                if fps_value is not None and fps_value >= 1:
+                    fps_text = f"{fps_value:.0f}fps"
+                else:
+                    fps_text = "N/A"
+
+                fps_item = QTableWidgetItem(fps_text)
+                if fps_value and fps_value >= 60:
+                    fps_item.setForeground(QColor("#00ff00"))
+                elif fps_value and fps_value >= 30:
+                    fps_item.setForeground(QColor("#ffaa00"))
+                elif fps_value and fps_value >= 1:
+                    fps_item.setForeground(QColor("#ff5555"))
+                else:
+                    fps_item.setForeground(QColor("#64748b"))
+                self.format_table.setItem(row, 7, fps_item)
+
+                # Column 8: HDR (Dynamic Range)
+                if f.get("vcodec") == "none":
+                    hdr_text = "N/A"
+                    hdr_item = QTableWidgetItem(hdr_text)
+                    hdr_item.setForeground(QColor("#64748b"))
+                else:
+                    hdr_value = f.get("dynamic_range")
+                    if hdr_value and hdr_value != "SDR":
+                        hdr_text = hdr_value
+                        hdr_item = QTableWidgetItem(hdr_text)
+                        hdr_item.setForeground(QColor("#00ffff"))
+                    else:
+                        hdr_text = "SDR"
+                        hdr_item = QTableWidgetItem(hdr_text)
+                        hdr_item.setForeground(QColor("#64748b"))
+                self.format_table.setItem(row, 8, hdr_item)
+
+    def _update_format_table(self, formats) -> None:
+        """Signal handler that triggers a full table rebuild when formats change."""
+        self = cast("SageApp", self)  # for autocompletion and type inference.
+
+        # Mark table as needing rebuild and trigger it
+        self._table_built = False
+        self._build_full_format_table()
+
+    def handle_checkbox_click(self, clicked_checkbox) -> None:
+        self = cast("SageApp", self)  # for autocompletion and type inference.
+
+        for checkbox in self.format_checkboxes:
+            if checkbox != clicked_checkbox:
+                checkbox.setChecked(False)
+
+    def get_selected_format(self):
+        self = cast("SageApp", self)  # for autocompletion and type inference.
+
+        for checkbox in self.format_checkboxes:
+            if checkbox.isChecked():
+                return {
+                    "format_id": checkbox.format_id,
+                    "is_audio_only": getattr(checkbox, "is_audio_only", False),
+                    "has_audio": getattr(checkbox, "has_audio", False),
+                }
+        return None
+
+    def update_format_table(self, formats) -> None:
+        self = cast("SageApp", self)  # for autocompletion and type inference.
+
+        self.all_formats = formats
+        self._table_built = False  # Reset flag to trigger rebuild with new formats
+        self.format_signals.format_update.emit(formats)
+
+        # Switch stacked widget from empty state to actual table
+        if hasattr(self, "format_table_stack"):
+            self.format_table_stack.setCurrentIndex(1)
+
+    def show_empty_state(self) -> None:
+        """Switch format table area back to the empty state placeholder."""
+        self = cast("SageApp", self)
+        if hasattr(self, "format_table_stack"):
+            self.format_table_stack.setCurrentIndex(0)
+
+    def get_quality_label(self, format_info) -> str:
+        """Determine quality label based on format information"""
+        self = cast("SageApp", self)  # for autocompletion and type inference.
+
+        if format_info.get("vcodec") == "none":
+            # Audio quality
+            abr = format_info.get("abr") or 0
+            if not isinstance(abr, (int, float)):
+                abr = 0
+            if abr >= 256:
+                return _("formats.best_audio")
+            elif abr >= 192:
+                return _("formats.high_audio")
+            elif abr >= 128:
+                return _("formats.medium_audio")
+            else:
+                return _("formats.low_audio")
+        else:
+            # Video quality based on height
+            height = 0
+            resolution = format_info.get("resolution", "")
+            if resolution:
+                try:
+                    parts = resolution.split("x")
+                    if len(parts) == 2:
+                        # Use the smaller dimension to correctly classify vertical videos
+                        height = min(int(parts[0]), int(parts[1]))
+                except:
+                    pass
+
+            if height >= 2160:
+                return _("formats.best_4k")
+            elif height >= 1440:
+                return _("formats.best_2k")
+            elif height >= 1080:
+                return _("formats.high_1080p")
+            elif height >= 720:
+                return _("formats.high_720p")
+            elif height >= 480:
+                return _("formats.medium_480p")
+            else:
+                return _("formats.low_quality")
+
+    def _get_quality_level(self, format_info) -> int:
+        """
+        Return numeric quality level for color coding.
+
+        Returns:
+            0 = best (green), 1 = high (light green),
+            2 = medium (orange), 3 = low (red)
+        """
+        self = cast("SageApp", self)
+        if format_info.get("vcodec") == "none":
+            abr = format_info.get("abr") or 0
+            if not isinstance(abr, (int, float)):
+                abr = 0
+            if abr >= 256:
+                return 0
+            elif abr >= 192:
+                return 1
+            elif abr >= 128:
+                return 2
+            else:
+                return 3
+        else:
+            height = 0
+            resolution = format_info.get("resolution", "")
+            if resolution:
+                try:
+                    parts = resolution.split("x")
+                    if len(parts) == 2:
+                        height = min(int(parts[0]), int(parts[1]))
+                except:
+                    pass
+            if height >= 1440:
+                return 0  # best_4k / best_2k
+            elif height >= 720:
+                return 1  # high_1080p / high_720p
+            elif height >= 480:
+                return 2  # medium_480p
+            else:
+                return 3  # low_quality

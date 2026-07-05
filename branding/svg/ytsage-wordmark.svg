@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 160" role="img" aria-labelledby="title" fill="none">
-  <title id="title">YTSage Logo</title>
+  <title id="title">SageDLP Logo</title>
   <defs>
     <!-- Match the hero gradient: white to accent red (#dc2626) -->
     <linearGradient id="ytGradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -13,5 +13,5 @@
         font-family="Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif"
         font-size="120" font-weight="900"
         text-anchor="middle" dominant-baseline="central"
-        fill="url(#ytGradient)">YTSage</text>
+        fill="url(#ytGradient)">SageDLP</text>
 </svg>

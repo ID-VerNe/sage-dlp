@@ -9,8 +9,8 @@ if not exist "python_embed\python.exe" (
     exit /b 1
 )
 
-echo Starting YTSage (Embedded Version)...
-python_embed\python.exe -c "import sys; sys.path.insert(0, '.'); from ytsage.main import main; main()"
+echo Starting Sage-DLP (Embedded Version)...
+python_embed\python.exe -c "import sys; sys.path.insert(0, '.'); from sage_dlp.main import main; main()"
 
 if %ERRORLEVEL% neq 0 (
     echo [ERROR] Application exited with error code %ERRORLEVEL%.

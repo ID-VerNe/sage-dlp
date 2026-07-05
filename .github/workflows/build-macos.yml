@@ -81,8 +81,8 @@ jobs:
       shell: bash
       run: |
         # Create entry point script
-        cat > ytsage_entry.py <<'ENTRY'
-        from ytsage.main import main
+        cat > sage_dlp_entry.py <<'ENTRY'
+        from sage_dlp.main import main
         if __name__ == "__main__":
             main()
         ENTRY
@@ -97,7 +97,7 @@ jobs:
             optimize=2,
             silent=True,
             packages=[
-                "ytsage",
+                "sage_dlp",
                 "PySide6.QtCore",
                 "PySide6.QtGui",
                 "PySide6.QtWidgets",
@@ -146,33 +146,33 @@ jobs:
                 "email",
             ],
             include_files=[
-                ("ytsage/assets/Icon", "lib/assets/Icon"),
-                ("ytsage/assets/sound", "lib/assets/sound"),
-                ("ytsage/languages", "lib/languages"),
+                ("sage_dlp/assets/Icon", "lib/assets/Icon"),
+                ("sage_dlp/assets/sound", "lib/assets/sound"),
+                ("sage_dlp/languages", "lib/languages"),
                 ("branding/icons", "lib/assets/branding/icons"),
             ],
         )
 
         executables = [
             Executable(
-                script="ytsage_entry.py",
-                target_name=f"YTSage-v{version}",
+                script="sage_dlp_entry.py",
+                target_name=f"SageDLP-v{version}",
                 icon="branding/icons/icon.icns",
             )
         ]
 
         setup(
-            name="YTSage",
+            name="SageDLP",
             version=version,
-            description="YTSage",
+            description="SageDLP",
             options={
                 "build_exe": build_exe_options,
                 "bdist_mac": {
                     "iconfile": "branding/icons/icon.icns",
-                    "bundle_name": f"YTSage-v{version}",
+                    "bundle_name": f"SageDLP-v{version}",
                 },
                 "bdist_dmg": {
-                    "volume_label": f"YTSage v{version}",
+                    "volume_label": f"SageDLP v{version}",
                     "applications_shortcut": True,
                     "format": "UDZO",
                     "filesystem": "HFS+",
@@ -196,7 +196,7 @@ jobs:
         
         # Locate the built .app
         app_path=""
-        for cand in "dist/YTSage-v${version}.app" "build/dist/YTSage-v${version}.app" "build/YTSage-v${version}.app"; do
+        for cand in "dist/SageDLP-v${version}.app" "build/dist/SageDLP-v${version}.app" "build/SageDLP-v${version}.app"; do
           if [ -d "$cand" ]; then app_path="$cand"; break; fi
         done
         if [ -z "$app_path" ]; then
@@ -209,8 +209,8 @@ jobs:
           # Simplified discovery of library directories
           # We search for 'lib' folders and then verify if they look like the python library folder
           find "$app_path/Contents" -type d -name "lib" | while read -r lib_dir; do
-              # Check if this lib dir is a python library dir (contains asyncio or PySide6 or ytsage)
-              if [ -d "$lib_dir/asyncio" ] || [ -d "$lib_dir/PySide6" ] || [ -d "$lib_dir/ytsage" ]; then
+              # Check if this lib dir is a python library dir (contains asyncio or PySide6 or sage_dlp)
+              if [ -d "$lib_dir/asyncio" ] || [ -d "$lib_dir/PySide6" ] || [ -d "$lib_dir/sage_dlp" ]; then
                   echo "Cleaning Library Directory: $lib_dir"
                   
                   # 1. Remove screenshots
@@ -270,7 +270,7 @@ jobs:
 
         # Find the .app bundle
         app_path=""
-        for cand in "dist/YTSage-v${version}.app" "build/dist/YTSage-v${version}.app" "build/YTSage-v${version}.app"; do
+        for cand in "dist/SageDLP-v${version}.app" "build/dist/SageDLP-v${version}.app" "build/SageDLP-v${version}.app"; do
           if [ -d "$cand" ]; then app_path="$cand"; break; fi
         done
         if [ -z "$app_path" ]; then
@@ -282,8 +282,8 @@ jobs:
           app_parent="$(dirname "$app_path")"
           
           # Create ZIP
-          (cd "$app_parent" && zip -r "${GITHUB_WORKSPACE}/artifacts/YTSage-v${version}-${ARCH_SUFFIX}.app.zip" "$app_base")
-          echo "Created: artifacts/YTSage-v${version}-${ARCH_SUFFIX}.app.zip"
+          (cd "$app_parent" && zip -r "${GITHUB_WORKSPACE}/artifacts/SageDLP-v${version}-${ARCH_SUFFIX}.app.zip" "$app_base")
+          echo "Created: artifacts/SageDLP-v${version}-${ARCH_SUFFIX}.app.zip"
           
           # Create DMG (Manual)
           echo "Creating DMG from $app_path..."
@@ -291,8 +291,8 @@ jobs:
           cp -R "$app_path" "dmg_stage/"
           ln -s /Applications "dmg_stage/Applications"
           
-          hdiutil create -volname "YTSage v${version}" -srcfolder "dmg_stage" -ov -format UDZO "artifacts/YTSage-v${version}-${ARCH_SUFFIX}.dmg"
-          echo "Created: artifacts/YTSage-v${version}-${ARCH_SUFFIX}.dmg"
+          hdiutil create -volname "SageDLP v${version}" -srcfolder "dmg_stage" -ov -format UDZO "artifacts/SageDLP-v${version}-${ARCH_SUFFIX}.dmg"
+          echo "Created: artifacts/SageDLP-v${version}-${ARCH_SUFFIX}.dmg"
           
           rm -rf dmg_stage
         else
@@ -307,13 +307,13 @@ jobs:
       uses: softprops/action-gh-release@v2
       with:
         tag_name: v${{ steps.get_version.outputs.VERSION }}
-        name: YTSage v${{ steps.get_version.outputs.VERSION }}
+        name: SageDLP v${{ steps.get_version.outputs.VERSION }}
         draft: true
         prerelease: false
         append_body: true
         fail_on_unmatched_files: false
         body: |
-          # YTSage v${{ steps.get_version.outputs.VERSION }}
+          # SageDLP v${{ steps.get_version.outputs.VERSION }}
 
           **Release Date**: ${{ github.event.head_commit.timestamp }}
         files: |

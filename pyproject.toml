@@ -3,7 +3,7 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "ytsage"
+name = "sage-dlp"
 version = "5.2.0"
 description = "Modern YouTube downloader with a clean PySide6 interface."
 authors = [
@@ -47,21 +47,21 @@ keywords = ["youtube", "downloader", "video", "audio", "PySide6", "yt-dlp", "GUI
 
 
 [project.scripts]
-ytsage = "ytsage.main:main"
+sage-dlp = "sage_dlp.main:main"
 
 [project.urls]
-Homepage = "https://github.com/oop7/YTSage"
-Bug-Tracker = "https://github.com/oop7/YTSage/issues"
+Homepage = "https://github.com/oop7/SageDLP"
+Bug-Tracker = "https://github.com/oop7/SageDLP/issues"
 Reddit = "https://www.reddit.com/r/NO-N_A_M_E/"
 
 [tool.setuptools]
 include-package-data = true
 
 [tool.setuptools.packages.find]
-include = ["ytsage*"]
+include = ["sage_dlp*"]
 
 [tool.setuptools.package-data]
-ytsage = [
+sage_dlp = [
     "assets/Icon/icon.png",
     "assets/sound/notification.mp3",
     "languages/*.json",

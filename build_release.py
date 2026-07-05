@@ -18,7 +18,7 @@ def build_release():
             content = f.read()
 
         # Base URL for assets
-        base_url = "https://github.com/oop7/YTSage/raw/main/branding/"
+        base_url = "https://github.com/oop7/SageDLP/raw/main/branding/"
         
         # Function to fix paths matches by regex
         def path_fixer(match):
@@ -39,7 +39,7 @@ def build_release():
         print("Modified README.md for PyPI (Absolute URLs)")
 
         # 3. Clean previous builds
-        for folder in ["dist", "build", "ytsage.egg-info"]:
+        for folder in ["dist", "build", "sage_dlp.egg-info"]:
             if os.path.exists(folder):
                 shutil.rmtree(folder)
 

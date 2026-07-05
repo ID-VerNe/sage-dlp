@@ -83,8 +83,8 @@ jobs:
       shell: bash
       run: |
         # Create entry point script
-        cat > ytsage_entry.py <<'ENTRY'
-        from ytsage.main import main
+        cat > sage_dlp_entry.py <<'ENTRY'
+        from sage_dlp.main import main
         if __name__ == "__main__":
             main()
         ENTRY
@@ -99,19 +99,19 @@ jobs:
 
         # Prepare include_files list
         include_files_list = [
-            ("ytsage/assets/Icon", "lib/assets/Icon"),
-            ("ytsage/assets/sound", "lib/assets/sound"),
-            ("ytsage/languages", "lib/languages"),
+            ("sage_dlp/assets/Icon", "lib/assets/Icon"),
+            ("sage_dlp/assets/sound", "lib/assets/sound"),
+            ("sage_dlp/languages", "lib/languages"),
             ("branding/icons", "lib/assets/branding/icons"),
-            ("ytsage.desktop", "share/applications/ytsage.desktop"),
-            ("branding/icons/icon.png", "share/pixmaps/ytsage.png"),
+            ("sage_dlp.desktop", "share/applications/sage_dlp.desktop"),
+            ("branding/icons/icon.png", "share/pixmaps/sage_dlp.png"),
         ]
 
         build_exe_options = dict(
             optimize=2,
             silent=True,
             packages=[
-                "ytsage",
+                "sage_dlp",
                 "PySide6.QtCore",
                 "PySide6.QtGui",
                 "PySide6.QtWidgets",
@@ -169,22 +169,22 @@ jobs:
 
         executables = [
             Executable(
-                script="ytsage_entry.py",
-                target_name="ytsage",
+                script="sage_dlp_entry.py",
+                target_name="sage_dlp",
                 icon="branding/icons/icon.png",
             )
         ]
 
         setup(
-            name="ytsage",
+            name="sage_dlp",
             version=version,
-            description="YTSage",
+            description="SageDLP",
             options={
                 "build_exe": build_exe_options,
                 # AppImage packaging
                 "bdist_appimage": {
                     # If ends with .AppImage, use verbatim file name
-                    "target_name": f"ytsage-v{version}.AppImage",
+                    "target_name": f"sage_dlp-v{version}.AppImage",
                 },
             },
             executables=executables,
@@ -194,16 +194,16 @@ jobs:
     - name: Create desktop entry
       shell: bash
       run: |
-        cat > ytsage.desktop <<'DESKTOP'
+        cat > sage_dlp.desktop <<'DESKTOP'
         [Desktop Entry]
         Type=Application
-        Name=YTSage
+        Name=SageDLP
         Comment=YouTube downloader
-        Exec=/usr/bin/ytsage %U
-        Icon=ytsage
+        Exec=/usr/bin/sage_dlp %U
+        Icon=sage_dlp
         Terminal=false
         Categories=AudioVideo;Network;Utility;
-        StartupWMClass=YTSage
+        StartupWMClass=SageDLP
         DESKTOP
 
     - name: Build AppImage and RPM
@@ -283,14 +283,14 @@ jobs:
         mkdir -p AppDir
         
         # Copy trimmed build content DIRECTLY to AppDir root
-        # This keeps 'lib' adjacent to 'ytsage', preventing 'ModuleNotFoundError: encodings'
+        # This keeps 'lib' adjacent to 'sage_dlp', preventing 'ModuleNotFoundError: encodings'
         cp -r "$build_dir"/* AppDir/
         
         # Setup metadata
-        cp ytsage.desktop AppDir/
+        cp sage_dlp.desktop AppDir/
         # Fix Exec path for AppImage context (binary is in root, not /usr/bin)
-        sed -i 's|Exec=/usr/bin/ytsage|Exec=ytsage|g' AppDir/ytsage.desktop
-        cp branding/icons/icon.png AppDir/ytsage.png
+        sed -i 's|Exec=/usr/bin/sage_dlp|Exec=sage_dlp|g' AppDir/sage_dlp.desktop
+        cp branding/icons/icon.png AppDir/sage_dlp.png
         # .DirIcon for file managers
         cp branding/icons/icon.png AppDir/.DirIcon 
         
@@ -300,13 +300,13 @@ jobs:
         SELF=$(readlink -f "$0")
         HERE=$(dirname "$SELF")
         export LD_LIBRARY_PATH="$HERE/lib:$LD_LIBRARY_PATH"
-        exec "$HERE/ytsage" "$@"
+        exec "$HERE/sage_dlp" "$@"
         APPRUN
         chmod +x AppDir/AppRun
         
         # Build AppImage (using --appimage-extract-and-run to avoid FUSE issues in CI)
         # We explicitly set ARCH for appimagetool
-        ARCH=x86_64 ./appimagetool --appimage-extract-and-run AppDir "dist/ytsage-v${version}.AppImage"
+        ARCH=x86_64 ./appimagetool --appimage-extract-and-run AppDir "dist/sage_dlp-v${version}.AppImage"
 
         # Build RPM manually with proper spec file
         version="${{ steps.get_version.outputs.VERSION }}"
@@ -317,54 +317,54 @@ jobs:
         # Create custom RPM spec file that doesn't auto-detect dependencies
         mkdir -p build/rpm/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
         
-        cat > build/rpm/SPECS/ytsage.spec <<SPEC
-        %global __requires_exclude_from ^/opt/ytsage/.*$
-        %global __provides_exclude_from ^/opt/ytsage/.*$
+        cat > build/rpm/SPECS/sage_dlp.spec <<SPEC
+        %global __requires_exclude_from ^/opt/sage_dlp/.*$
+        %global __provides_exclude_from ^/opt/sage_dlp/.*$
         %define _build_id_links none
         %undefine _missing_build_ids_terminate_build
         
-        Name:           ytsage
+        Name:           sage_dlp
         Version:        ${version//-/.}
         Release:        1%{?dist}
-        Summary:        YTSage - A modern YouTube downloader
+        Summary:        SageDLP - A modern YouTube downloader
         License:        MIT
-        URL:            https://github.com/oop7/YTSage
+        URL:            https://github.com/oop7/SageDLP
         AutoReqProv:    no
         
         %description
-        YTSage is a modern YouTube downloader with a PySide6 interface.
+        SageDLP is a modern YouTube downloader with a PySide6 interface.
         Download videos, extract audio, fetch subtitles, and more.
         All dependencies are bundled within the package.
         
         %install
         rm -rf %{buildroot}
-        mkdir -p %{buildroot}/opt/ytsage
+        mkdir -p %{buildroot}/opt/sage_dlp
         mkdir -p %{buildroot}/usr/bin
         mkdir -p %{buildroot}/usr/share/applications
         mkdir -p %{buildroot}/usr/share/pixmaps
         
         # Copy application files
-        cp -a ${build_dir_abs}/* %{buildroot}/opt/ytsage/
+        cp -a ${build_dir_abs}/* %{buildroot}/opt/sage_dlp/
         
         # Create wrapper script
-        cat > %{buildroot}/usr/bin/ytsage <<'WRAPPER'
+        cat > %{buildroot}/usr/bin/sage_dlp <<'WRAPPER'
         #!/usr/bin/env bash
         set -euo pipefail
-        APPDIR="/opt/ytsage"
+        APPDIR="/opt/sage_dlp"
         cd "\$APPDIR"
-        exec "\$APPDIR/ytsage" "\$@"
+        exec "\$APPDIR/sage_dlp" "\$@"
         WRAPPER
-        chmod 0755 %{buildroot}/usr/bin/ytsage
+        chmod 0755 %{buildroot}/usr/bin/sage_dlp
         
         # Install desktop file and icon
-        install -m 0644 ${workspace_root}/ytsage.desktop %{buildroot}/usr/share/applications/ytsage.desktop
-        install -m 0644 ${workspace_root}/branding/icons/icon.png %{buildroot}/usr/share/pixmaps/ytsage.png
+        install -m 0644 ${workspace_root}/sage_dlp.desktop %{buildroot}/usr/share/applications/sage_dlp.desktop
+        install -m 0644 ${workspace_root}/branding/icons/icon.png %{buildroot}/usr/share/pixmaps/sage_dlp.png
         
         %files
-        /opt/ytsage
-        /usr/bin/ytsage
-        /usr/share/applications/ytsage.desktop
-        /usr/share/pixmaps/ytsage.png
+        /opt/sage_dlp
+        /usr/bin/sage_dlp
+        /usr/share/applications/sage_dlp.desktop
+        /usr/share/pixmaps/sage_dlp.png
         
         %post
         if command -v update-desktop-database >/dev/null 2>&1; then
@@ -377,12 +377,12 @@ jobs:
         fi
         
         %changelog
-        * $(date +'%a %b %d %Y') YTSage Maintainers <noreply@example.com> - ${version//-/.}-1
+        * $(date +'%a %b %d %Y') SageDLP Maintainers <noreply@example.com> - ${version//-/.}-1
         - Release ${version}
         SPEC
         
         # Build the RPM
-        rpmbuild -bb build/rpm/SPECS/ytsage.spec \
+        rpmbuild -bb build/rpm/SPECS/sage_dlp.spec \
           --define "_topdir $(pwd)/build/rpm" \
           --buildroot "$(pwd)/build/rpm/BUILDROOT"
         
@@ -421,35 +421,35 @@ jobs:
                  "$pkgroot/usr/bin" \
                  "$pkgroot/usr/share/applications" \
                  "$pkgroot/usr/share/pixmaps" \
-                 "$pkgroot/opt/ytsage"
+                 "$pkgroot/opt/sage_dlp"
 
-        # Install application payload under /opt/ytsage
-        cp -a "$build_dir"/* "$pkgroot/opt/ytsage/"
+        # Install application payload under /opt/sage_dlp
+        cp -a "$build_dir"/* "$pkgroot/opt/sage_dlp/"
 
         # Wrapper to ensure correct working directory
-        cat > "$pkgroot/usr/bin/ytsage" <<'WRAP'
+        cat > "$pkgroot/usr/bin/sage_dlp" <<'WRAP'
         #!/usr/bin/env bash
         set -euo pipefail
-        APPDIR="/opt/ytsage"
+        APPDIR="/opt/sage_dlp"
         cd "$APPDIR"
-        exec "$APPDIR/ytsage" "$@"
+        exec "$APPDIR/sage_dlp" "$@"
         WRAP
-        chmod 0755 "$pkgroot/usr/bin/ytsage"
+        chmod 0755 "$pkgroot/usr/bin/sage_dlp"
 
         # Desktop file and icon
-        install -m 0644 ytsage.desktop "$pkgroot/usr/share/applications/ytsage.desktop"
-        install -m 0644 branding/icons/icon.png "$pkgroot/usr/share/pixmaps/ytsage.png"
+        install -m 0644 sage_dlp.desktop "$pkgroot/usr/share/applications/sage_dlp.desktop"
+        install -m 0644 branding/icons/icon.png "$pkgroot/usr/share/pixmaps/sage_dlp.png"
 
         # Control file
         cat > "$pkgroot/DEBIAN/control" <<CONTROL
-        Package: ytsage
+        Package: sage_dlp
         Version: ${version}
         Section: utils
         Priority: optional
         Architecture: ${deb_arch}
-        Maintainer: YTSage Maintainers <noreply@example.com>
-        Homepage: https://github.com/oop7/YTSage
-        Description: YTSage - A modern YouTube downloader with a PySide6 interface
+        Maintainer: SageDLP Maintainers <noreply@example.com>
+        Homepage: https://github.com/oop7/SageDLP
+        Description: SageDLP - A modern YouTube downloader with a PySide6 interface
          Download videos, extract audio, fetch subtitles, and more.
         CONTROL
 
@@ -474,7 +474,7 @@ jobs:
         TRIGGERS
 
         # Build the deb
-        deb_out="YTSage-v${version}-${deb_arch}.deb"
+        deb_out="SageDLP-v${version}-${deb_arch}.deb"
         dpkg-deb --build "$pkgroot" "$deb_out"
 
         mkdir -p artifacts
@@ -491,31 +491,31 @@ jobs:
         flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
         # Define manifest ID
-        APP_ID="io.github.oop7.YTSage"
+        APP_ID="io.github.oop7.SageDLP"
         
         # Create a specific desktop file for Flatpak
-        # - Exec must be 'ytsage' (in path), not /usr/bin/ytsage
-        # - Icon must match the App ID (io.github.oop7.YTSage)
+        # - Exec must be 'sage_dlp' (in path), not /usr/bin/sage_dlp
+        # - Icon must match the App ID (io.github.oop7.SageDLP)
         cat > flatpak.desktop <<EOF
         [Desktop Entry]
         Type=Application
-        Name=YTSage
+        Name=SageDLP
         Comment=YouTube downloader
-        Exec=ytsage 
+        Exec=sage_dlp 
         Icon=$APP_ID
         Terminal=false
         Categories=AudioVideo;Network;Utility;
-        StartupWMClass=YTSage
+        StartupWMClass=SageDLP
         EOF
 
         # Create manifest manually
-        cat > ytsage_flatpak.json <<EOF
+        cat > sage_dlp_flatpak.json <<EOF
         {
           "app-id": "$APP_ID",
           "runtime": "org.kde.Platform",
           "runtime-version": "6.10",
           "sdk": "org.kde.Sdk",
-          "command": "ytsage",
+          "command": "sage_dlp",
           "finish-args": [
             "--share=ipc",
             "--socket=x11",
@@ -529,12 +529,12 @@ jobs:
           ],
           "modules": [
             {
-              "name": "ytsage",
+              "name": "sage_dlp",
               "buildsystem": "simple",
               "build-commands": [
-                "mkdir -p /app/bin /app/share/ytsage",
-                "cp -r dist/ytsage-v${version}-*/* /app/share/ytsage/",
-                "ln -s /app/share/ytsage/ytsage /app/bin/ytsage",
+                "mkdir -p /app/bin /app/share/sage_dlp",
+                "cp -r dist/sage_dlp-v${version}-*/* /app/share/sage_dlp/",
+                "ln -s /app/share/sage_dlp/sage_dlp /app/bin/sage_dlp",
                 "install -D flatpak.desktop /app/share/applications/$APP_ID.desktop",
                 "install -D branding/icons/icon.png /app/share/icons/hicolor/128x128/apps/$APP_ID.png"
               ],
@@ -562,18 +562,18 @@ jobs:
         fi
         
         # Move build dir to a fixed location for the manifest source to catch
-        mkdir -p dist/ytsage-v${version}-flatpak
-        cp -r "$build_dir"/* "dist/ytsage-v${version}-flatpak/"
+        mkdir -p dist/sage_dlp-v${version}-flatpak
+        cp -r "$build_dir"/* "dist/sage_dlp-v${version}-flatpak/"
         
         # Install runtime/sdk
         flatpak install -y --user flathub org.kde.Platform//6.10 org.kde.Sdk//6.10
 
         # Build
-        flatpak-builder --user --install-deps-from=flathub --repo=repo --force-clean build-flatpak ytsage_flatpak.json
+        flatpak-builder --user --install-deps-from=flathub --repo=repo --force-clean build-flatpak sage_dlp_flatpak.json
         
         # Bundle
-        flatpak build-bundle repo artifacts/YTSage-v${version}-x86_64.flatpak $APP_ID
-        echo "Built Flatpak: artifacts/YTSage-v${version}-x86_64.flatpak"
+        flatpak build-bundle repo artifacts/SageDLP-v${version}-x86_64.flatpak $APP_ID
+        echo "Built Flatpak: artifacts/SageDLP-v${version}-x86_64.flatpak"
 
     - name: Package and prepare release artifacts (.AppImage, .rpm, .deb)
       shell: bash
@@ -582,19 +582,19 @@ jobs:
         mkdir -p artifacts
 
         # Copy AppImage
-        appimage_src=$(ls dist/ytsage-v*.AppImage 2>/dev/null | head -n1 || true)
+        appimage_src=$(ls dist/sage_dlp-v*.AppImage 2>/dev/null | head -n1 || true)
         if [ -n "$appimage_src" ]; then
-          cp "$appimage_src" "artifacts/YTSage-v${version}-${ARCH}.AppImage"
-          echo "Copied AppImage: $appimage_src -> artifacts/YTSage-v${version}-${ARCH}.AppImage"
+          cp "$appimage_src" "artifacts/SageDLP-v${version}-${ARCH}.AppImage"
+          echo "Copied AppImage: $appimage_src -> artifacts/SageDLP-v${version}-${ARCH}.AppImage"
         else
           echo "Warning: No .AppImage found in dist/"
         fi
 
         # Copy RPM (normalize name)
-        rpm_src=$(ls dist/ytsage-*.rpm 2>/dev/null | head -n1 || true)
+        rpm_src=$(ls dist/sage_dlp-*.rpm 2>/dev/null | head -n1 || true)
         if [ -n "$rpm_src" ]; then
-          cp "$rpm_src" "artifacts/YTSage-v${version}-${ARCH}.rpm"
-          echo "Copied RPM: $rpm_src -> artifacts/YTSage-v${version}-${ARCH}.rpm"
+          cp "$rpm_src" "artifacts/SageDLP-v${version}-${ARCH}.rpm"
+          echo "Copied RPM: $rpm_src -> artifacts/SageDLP-v${version}-${ARCH}.rpm"
         else
           echo "Warning: No .rpm found in dist/"
         fi
@@ -612,13 +612,13 @@ jobs:
       uses: softprops/action-gh-release@v2
       with:
         tag_name: v${{ steps.get_version.outputs.VERSION }}
-        name: YTSage v${{ steps.get_version.outputs.VERSION }}
+        name: SageDLP v${{ steps.get_version.outputs.VERSION }}
         draft: true
         prerelease: false
         append_body: true
         fail_on_unmatched_files: false
         body: |
-          # YTSage v${{ steps.get_version.outputs.VERSION }}
+          # SageDLP v${{ steps.get_version.outputs.VERSION }}
 
           **Release Date**: ${{ github.event.head_commit.timestamp }}
         files: |
