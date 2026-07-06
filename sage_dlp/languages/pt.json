@@ -608,36 +608,5 @@
     "check_failed": "Falha ao verificar versão. Verifique sua conexão com a Internet.",
     "description": "Verifique sua versão do FFmpeg e compare com a última versão disponível.",
     "guide_info": " Para instalar ou atualizar o FFmpeg, <a href='https://github.com/oop7/ffmpeg-install-guide'>clique aqui para ver nosso guia completo de instalação</a>."
-  },
-  "deno": {
-    "setup_required": "Configuração do Deno Necessária",
-    "setup_description": "O SageDLP requer o Deno para executar determinados recursos.<br><br>O Deno não foi encontrado no diretório local do aplicativo. O SageDLP precisa configurar o Deno para o seu sistema {os_name}.<br><br>Clique em 'Configurar Deno' para baixar e instalar automaticamente.",
-    "setup_button": "Configurar Deno",
-    "downloading": "Baixando Deno...",
-    "extracting": "Extraindo Deno...",
-    "verifying": "Verificando Deno...",
-    "success": "Deno foi instalado com sucesso!",
-    "download_failed": "Falha no Download",
-    "download_error": "Falha ao baixar o Deno: {error}",
-    "verification_failed": "Falha na verificação SHA256. O arquivo baixado pode estar corrompido ou adulterado.",
-    "setup_failed": "Falha ao configurar o Deno. Alguns recursos podem não funcionar corretamente.",
-    "setup_error": "Erro de Configuração"
-  },
-  "deno_updater": {
-    "title": "Verificador e Atualizador de Versão do Deno",
-    "description": "Verifique sua versão do Deno e atualize para a versão mais recente.",
-    "current_version": "Versão Atual:",
-    "latest_version": "Última Versão:",
-    "status_idle": "Clique em 'Verificar Atualizações' para começar",
-    "status_checking": "🔄 Verificando atualizações...",
-    "status_up_to_date": "✓ Atualizado",
-    "status_update_available": "⚠ Atualização disponível",
-    "status_not_installed": "✗ Não instalado",
-    "check_updates": "Verificar Atualizações",
-    "update_now": "Atualizar Deno",
-    "updating": "🔄 Atualizando Deno...",
-    "update_success": "✅ Deno foi atualizado com sucesso!",
-    "update_failed": "❌ Falha na atualização: {error}",
-    "check_failed": "Falha ao verificar atualizações. Verifique sua conexão com a Internet."
   }
 }

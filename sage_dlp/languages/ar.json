@@ -608,36 +608,5 @@
     "check_failed": "فشل التحقق من الإصدار. يرجى التحقق من اتصال الإنترنت.",
     "description": "تحقق من إصدار FFmpeg الخاص بك وقارنه بأحدث إصدار متاح.",
     "guide_info": " لتثبيت أو تحديث FFmpeg، <a href='https://github.com/oop7/ffmpeg-install-guide'>انقر هنا لعرض دليل التثبيت الشامل</a>."
-  },
-  "deno": {
-    "setup_required": "إعداد Deno مطلوب",
-    "setup_description": "يتطلب SageDLP Deno لتشغيل ميزات معينة.<br><br>لم يتم العثور على Deno في الدليل المحلي للتطبيق. يحتاج SageDLP إلى إعداد Deno لنظام {os_name} الخاص بك.<br><br>انقر فوق 'إعداد Deno' للتنزيل والتثبيت تلقائياً.",
-    "setup_button": "إعداد Deno",
-    "downloading": "جاري تنزيل Deno...",
-    "extracting": "جاري استخراج Deno...",
-    "verifying": "جاري التحقق من Deno...",
-    "success": "تم تثبيت Deno بنجاح!",
-    "download_failed": "فشل التنزيل",
-    "download_error": "فشل تنزيل Deno: {error}",
-    "verification_failed": "فشل التحقق من SHA256. قد يكون الملف المنزل تالفاً أو تم العبث به.",
-    "setup_failed": "فشل إعداد Deno. قد لا تعمل بعض الميزات بشكل صحيح.",
-    "setup_error": "خطأ في الإعداد"
-  },
-  "deno_updater": {
-    "title": "فاحص ومحدث إصدار Deno",
-    "description": "تحقق من إصدار Deno الخاص بك وقم بالتحديث إلى أحدث إصدار.",
-    "current_version": "الإصدار الحالي:",
-    "latest_version": "أحدث إصدار:",
-    "status_idle": "انقر فوق 'التحقق من التحديثات' للبدء",
-    "status_checking": "🔄 جارٍ التحقق من التحديثات...",
-    "status_up_to_date": "✓ محدث",
-    "status_update_available": "⚠ التحديث متاح",
-    "status_not_installed": "✗ غير مثبت",
-    "check_updates": "التحقق من التحديثات",
-    "update_now": "تحديث Deno",
-    "updating": "🔄 جارٍ تحديث Deno...",
-    "update_success": "✅ تم تحديث Deno بنجاح!",
-    "update_failed": "❌ فشل التحديث: {error}",
-    "check_failed": "فشل التحقق من التحديثات. يرجى التحقق من اتصالك بالإنترنت."
   }
 }

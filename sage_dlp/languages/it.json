@@ -608,36 +608,5 @@
     "check_failed": "Verifica versione non riuscita. Controlla la connessione Internet.",
     "description": "Controlla la tua versione di FFmpeg e confrontala con l'ultima versione disponibile.",
     "guide_info": " Per installare o aggiornare FFmpeg, <a href='https://github.com/oop7/ffmpeg-install-guide'>clicca qui per visualizzare la nostra guida completa all'installazione</a>."
-  },
-  "deno": {
-    "setup_required": "Configurazione Deno richiesta",
-    "setup_description": "SageDLP richiede Deno per eseguire alcune funzionalità.<br><br>Deno non è stato trovato nella directory locale dell'app. SageDLP deve configurare Deno per il tuo sistema {os_name}.<br><br>Fai clic su 'Configura Deno' per scaricare e installare automaticamente.",
-    "setup_button": "Configura Deno",
-    "downloading": "Download di Deno in corso...",
-    "extracting": "Estrazione di Deno in corso...",
-    "verifying": "Verifica di Deno in corso...",
-    "success": "Deno è stato installato con successo!",
-    "download_failed": "Download fallito",
-    "download_error": "Impossibile scaricare Deno: {error}",
-    "verification_failed": "Verifica SHA256 fallita. Il file scaricato potrebbe essere danneggiato o manomesso.",
-    "setup_failed": "Impossibile configurare Deno. Alcune funzionalità potrebbero non funzionare correttamente.",
-    "setup_error": "Errore di configurazione"
-  },
-  "deno_updater": {
-    "title": "Verificatore e Aggiornatore Versione Deno",
-    "description": "Controlla la tua versione di Deno e aggiorna all'ultima versione.",
-    "current_version": "Versione Corrente:",
-    "latest_version": "Ultima Versione:",
-    "status_idle": "Fai clic su 'Controlla Aggiornamenti' per iniziare",
-    "status_checking": "🔄 Controllo aggiornamenti...",
-    "status_up_to_date": "✓ Aggiornato",
-    "status_update_available": "⚠ Aggiornamento disponibile",
-    "status_not_installed": "✗ Non installato",
-    "check_updates": "Controlla Aggiornamenti",
-    "update_now": "Aggiorna Deno",
-    "updating": "🔄 Aggiornamento di Deno...",
-    "update_success": "✅ Deno è stato aggiornato con successo!",
-    "update_failed": "❌ Aggiornamento fallito: {error}",
-    "check_failed": "Impossibile controllare gli aggiornamenti. Controlla la tua connessione Internet."
   }
 }

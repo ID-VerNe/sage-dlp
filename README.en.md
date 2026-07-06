@@ -10,7 +10,7 @@ Download YouTube videos, extract audio, and process raw caption data through gra
 pip install sage-dlp
 ```
 
-Requires Python 3.10-3.14. The application manages its own runtime dependencies (Deno, FFmpeg, yt-dlp) on first launch, so no manual toolchain setup is needed.
+Requires Python 3.10-3.14. The application manages its own runtime dependencies (FFmpeg, yt-dlp) on first launch, so no manual toolchain setup is needed.
 
 ## Features
 
@@ -20,7 +20,7 @@ Requires Python 3.10-3.14. The application manages its own runtime dependencies 
 
 - **json3-to-SRT conversion pipeline.** Reads YouTube's proprietary `.json3` caption format, parses it into flat word sequences, then processes through the segmenter to produce properly-timed, grammatically-correct SRT files.
 
-- **Self-contained dependency bootstrap.** Downloads and verifies Deno, FFmpeg (zip or 7z), and yt-dlp with SHA256 checksums. No pre-installed toolchain required.
+- **Self-contained dependency bootstrap.** Downloads and verifies FFmpeg (zip or 7z), and yt-dlp with SHA256 checksums. No pre-installed toolchain required.
 
 - **Companion browser extension.** Chrome/Edge extension that auto-detects cookies on YouTube tabs and pushes them to a local HTTP server, eliminating manual cookie file exports.
 
@@ -30,7 +30,7 @@ Requires Python 3.10-3.14. The application manages its own runtime dependencies 
 
 1. Install via pip, then run `sage-dlp`.
 
-2. On first run, the app downloads FFmpeg, yt-dlp, and Deno automatically.
+2. On first run, the app downloads FFmpeg and yt-dlp automatically.
 
 3. Paste a YouTube URL. The app fetches available formats and subtitle tracks.
 

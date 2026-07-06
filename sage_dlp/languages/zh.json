@@ -651,37 +651,6 @@
     "description": "管理和更新 FFmpeg。FFmpeg 用于视频合并与字幕嵌入。",
     "guide_info": "查看 FFmpeg 安装指南"
   },
-  "deno": {
-    "setup_required": "需要 Deno 运行时",
-    "setup_description": "字幕处理功能需要 Deno 运行时。是否自动下载安装？",
-    "setup_button": "安装 Deno",
-    "downloading": "正在下载 Deno...",
-    "extracting": "正在解压 Deno...",
-    "verifying": "正在验证 Deno...",
-    "success": "Deno 安装成功",
-    "download_failed": "Deno 下载失败",
-    "download_error": "Deno 下载出错: {error}",
-    "verification_failed": "Deno 验证失败",
-    "setup_failed": "Deno 设置失败",
-    "setup_error": "Deno 设置出错: {error}"
-  },
-  "deno_updater": {
-    "title": "Deno 更新",
-    "description": "管理和更新 Deno 运行时。Deno 用于字幕智能断句处理。",
-    "current_version": "当前版本：{version}",
-    "latest_version": "最新版本：{version}",
-    "status_idle": "就绪",
-    "status_checking": "检查中...",
-    "status_up_to_date": "已是最新版本",
-    "status_update_available": "有可用更新",
-    "status_not_installed": "未安装",
-    "check_updates": "检查更新",
-    "update_now": "立即更新",
-    "updating": "正在更新...",
-    "update_success": "Deno 更新成功",
-    "update_failed": "Deno 更新失败",
-    "check_failed": "检查更新失败"
-  },
   "subtitle_selection": {
     "count_selected": "已选择 {count} 个字幕"
   },

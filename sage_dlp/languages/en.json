@@ -634,37 +634,6 @@
     "description": "Check your FFmpeg version and compare it with the latest available version.",
     "guide_info": " To install or update FFmpeg, <a href='https://github.com/oop7/ffmpeg-install-guide'>click here to view our comprehensive installation guide</a>."
   },
-  "deno": {
-    "setup_required": "Deno Setup Required",
-    "setup_description": "SageDLP requires Deno to run certain features.<br><br>Deno was not found in the app's local directory. SageDLP needs to set up Deno for your {os_name} system.<br><br>Click 'Setup Deno' to download and install automatically.",
-    "setup_button": "Setup Deno",
-    "downloading": "Downloading Deno...",
-    "extracting": "Extracting Deno...",
-    "verifying": "Verifying Deno...",
-    "success": "Deno was successfully installed!",
-    "download_failed": "Download Failed",
-    "download_error": "Failed to download Deno: {error}",
-    "verification_failed": "SHA256 verification failed. The downloaded file may be corrupted or tampered with.",
-    "setup_failed": "Failed to set up Deno. Some features may not work correctly.",
-    "setup_error": "Setup Error"
-  },
-  "deno_updater": {
-    "title": "Deno Version Checker & Updater",
-    "description": "Check your Deno version and update to the latest release.",
-    "current_version": "Current Version:",
-    "latest_version": "Latest Version:",
-    "status_idle": "Click 'Check for Updates' to get started",
-    "status_checking": "🔄 Checking for updates...",
-    "status_up_to_date": "✓ Up to date",
-    "status_update_available": "⚠ Update available",
-    "status_not_installed": "✗ Not installed",
-    "check_updates": "Check for Updates",
-    "update_now": "Update Deno",
-    "updating": "🔄 Updating Deno...",
-    "update_success": "✅ Deno has been successfully updated!",
-    "update_failed": "❌ Update failed: {error}",
-    "check_failed": "Failed to check for updates. Please check your internet connection."
-  },
   "llm": {
     "tab_title": "LLM Smart Segmentation",
     "help_text": "Configure LLM-powered subtitle segmentation. Requires an OpenAI-compatible API endpoint (local or cloud).",

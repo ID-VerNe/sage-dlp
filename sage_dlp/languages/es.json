@@ -608,36 +608,5 @@
     "check_failed": "Error al verificar la versión. Por favor, verifique su conexión a internet.",
     "description": "Compruebe su versión de FFmpeg y compárela con la última versión disponible.",
     "guide_info": " Para instalar o actualizar FFmpeg, <a href='https://github.com/oop7/ffmpeg-install-guide'>haga clic aquí para ver nuestra guía completa de instalación</a>."
-  },
-  "deno": {
-    "setup_required": "Configuración de Deno requerida",
-    "setup_description": "SageDLP requiere Deno para ejecutar ciertas funciones.<br><br>No se encontró Deno en el directorio local de la aplicación. SageDLP necesita configurar Deno para su sistema {os_name}.<br><br>Haga clic en 'Configurar Deno' para descargar e instalar automáticamente.",
-    "setup_button": "Configurar Deno",
-    "downloading": "Descargando Deno...",
-    "extracting": "Extrayendo Deno...",
-    "verifying": "Verificando Deno...",
-    "success": "¡Deno se instaló correctamente!",
-    "download_failed": "Descarga fallida",
-    "download_error": "Error al descargar Deno: {error}",
-    "verification_failed": "Error en la verificación SHA256. El archivo descargado puede estar dañado o alterado.",
-    "setup_failed": "Error al configurar Deno. Es posible que algunas funciones no funcionen correctamente.",
-    "setup_error": "Error de configuración"
-  },
-  "deno_updater": {
-    "title": "Verificador y Actualizador de Versión de Deno",
-    "description": "Verifique su versión de Deno y actualice a la última versión.",
-    "current_version": "Versión Actual:",
-    "latest_version": "Última Versión:",
-    "status_idle": "Haga clic en 'Buscar Actualizaciones' para comenzar",
-    "status_checking": "🔄 Buscando actualizaciones...",
-    "status_up_to_date": "✓ Actualizado",
-    "status_update_available": "⚠ Actualización disponible",
-    "status_not_installed": "✗ No instalado",
-    "check_updates": "Buscar Actualizaciones",
-    "update_now": "Actualizar Deno",
-    "updating": "🔄 Actualizando Deno...",
-    "update_success": "✅ ¡Deno se ha actualizado correctamente!",
-    "update_failed": "❌ Error en la actualización: {error}",
-    "check_failed": "Error al buscar actualizaciones. Por favor, verifique su conexión a Internet."
   }
 }

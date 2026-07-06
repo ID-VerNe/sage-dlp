@@ -46,7 +46,6 @@ except ImportError:
 _version_cache: Dict[str, Dict[str, Any]] = {
     "ytdlp": {"version": None, "path": None, "last_check": 0, "path_mtime": 0},
     "ffmpeg": {"version": None, "path": None, "last_check": 0, "path_mtime": 0},
-    "deno": {"version": None, "path": None, "last_check": 0, "path_mtime": 0},
 }
 
 # Cache expiry time in seconds (5 minutes)
@@ -176,32 +175,6 @@ def get_ffmpeg_version_cached() -> str:
         return "Error getting version"
 
 
-def get_deno_version_cached() -> str:
-    """Get Deno version with caching support."""
-    try:
-        from .sage_deno import get_deno_path
-        
-        current_path = get_deno_path()
-
-        # Check if we need to refresh cache
-        if not should_refresh_cache("deno", current_path):
-            cached_version = _version_cache["deno"].get("version")
-            if cached_version:
-                return cached_version
-
-        # Get fresh version info
-        from .sage_deno import get_deno_version_direct
-        version_info = get_deno_version_direct(current_path)
-
-        # Update cache
-        update_version_cache("deno", version_info, current_path)
-
-        return version_info
-    except Exception as e:
-        logger.exception(f"Error getting cached Deno version: {e}")
-        return "Error getting version"
-
-
 def refresh_version_cache(force=False) -> bool:
     """Manually refresh version cache for all tools."""
     try:
@@ -213,12 +186,6 @@ def refresh_version_cache(force=False) -> bool:
         # Refresh FFmpeg
         version_info = get_ffmpeg_version_direct()
         update_version_cache("ffmpeg", version_info, "ffmpeg", force_save=True)
-
-        # Refresh Deno
-        from .sage_deno import get_deno_path, get_deno_version_direct
-        deno_path = get_deno_path()
-        version_info = get_deno_version_direct(deno_path)
-        update_version_cache("deno", version_info, deno_path, force_save=True)
 
         return True
     except Exception as e:
@@ -234,11 +201,6 @@ def get_ytdlp_version() -> str:
 def get_ffmpeg_version() -> str:
     """Get the version of FFmpeg (uses cached version for performance)."""
     return get_ffmpeg_version_cached()
-
-
-def get_deno_version() -> str:
-    """Get the version of Deno (uses cached version for performance)."""
-    return get_deno_version_cached()
 
 
 def get_ytdlp_version_direct(yt_dlp_path: Optional[str] = None) -> str:

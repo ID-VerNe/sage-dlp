@@ -39,7 +39,6 @@ from .. import __version__ as APP_VERSION
 from ..core.sage_downloader import DownloadThread, SignalManager  # Import downloader related classes
 from ..core.sage_utils import check_ffmpeg, load_saved_path, parse_yt_dlp_error, save_path, should_check_for_auto_update, validate_video_url
 from ..core.sage_yt_dlp import get_yt_dlp_path, setup_ytdlp  # Import the new yt-dlp functions
-from ..core.sage_deno import get_deno_path, setup_deno  # Import the new Deno functions
 from .sage_gui_dialogs import (  # use of src\gui\sage_gui_dialogs\__init__.py
     AutoUpdateThread,
     CustomOptionsDialog,
@@ -324,13 +323,7 @@ class SageApp(QMainWindow, FormatTableMixin, VideoInfoMixin, AnalysisMixin):  # 
         else:
             logger.info(f"Using yt-dlp from: {ytdlp_path}")
 
-        # Check for Deno in our app's bin directory
-        deno_path = get_deno_path()
-        if deno_path == "deno":  # Not found in app dir
-            self.show_deno_setup_dialog()
-        else:
-            logger.info(f"Using Deno from: {deno_path}")
-
+        
         self.check_for_updates()
 
         # Start the cookie HTTP server for browser extension bridge
@@ -1660,18 +1653,6 @@ class SageApp(QMainWindow, FormatTableMixin, VideoInfoMixin, AnalysisMixin):  # 
             success_dialog.setIcon(QMessageBox.Icon.Information)
             success_dialog.setWindowTitle(_("ytdlp_setup.success_dialog_title"))
             success_dialog.setText(_("ytdlp_setup.success_dialog_message", path=yt_dlp_path))
-            success_dialog.setWindowIcon(self.windowIcon())
-            success_dialog.setStyleSheet(StyleSheet.SETUP_SUCCESS_DIALOG)
-            self.run_dialog_with_blur(success_dialog)
-
-    def show_deno_setup_dialog(self) -> None:
-        """Show the Deno setup dialog to configure Deno"""
-        deno_path = setup_deno(self)
-        if deno_path != "deno":
-            success_dialog = QMessageBox(self)
-            success_dialog.setIcon(QMessageBox.Icon.Information)
-            success_dialog.setWindowTitle(_("deno.setup_required"))
-            success_dialog.setText(f"{_('deno.success')}\n{deno_path}")
             success_dialog.setWindowIcon(self.windowIcon())
             success_dialog.setStyleSheet(StyleSheet.SETUP_SUCCESS_DIALOG)
             self.run_dialog_with_blur(success_dialog)

@@ -154,26 +154,6 @@ YTDLP_DOCS_URL: str = "https://github.com/yt-dlp/yt-dlp?tab=readme-ov-file#usage
 # yt-dlp SHA256 checksums URL
 YTDLP_SHA256_URL: str = "https://github.com/yt-dlp/yt-dlp/releases/latest/download/SHA2-256SUMS"
 
-# Deno download URLs and paths
-if OS_NAME == "Windows":
-    DENO_DOWNLOAD_URL: str = "https://github.com/denoland/deno/releases/latest/download/deno-x86_64-pc-windows-msvc.zip"
-    DENO_SHA256_URL: str = "https://github.com/denoland/deno/releases/latest/download/deno-x86_64-pc-windows-msvc.zip.sha256sum"
-    DENO_APP_BIN_PATH: Path = APP_BIN_DIR / "deno.exe"
-elif OS_NAME == "Darwin":  # macOS
-    DENO_DOWNLOAD_URL: str = "https://github.com/denoland/deno/releases/latest/download/deno-x86_64-apple-darwin.zip"
-    DENO_SHA256_URL: str = "https://github.com/denoland/deno/releases/latest/download/deno-x86_64-apple-darwin.zip.sha256sum"
-    DENO_APP_BIN_PATH: Path = APP_BIN_DIR / "deno"
-else:  # Linux
-    DENO_DOWNLOAD_URL: str = "https://github.com/denoland/deno/releases/latest/download/deno-x86_64-unknown-linux-gnu.zip"
-    DENO_SHA256_URL: str = "https://github.com/denoland/deno/releases/latest/download/deno-x86_64-unknown-linux-gnu.zip.sha256sum"
-    
-    # Check for environment variable override (critical for Flatpak support)
-    _deno_env_path = os.environ.get("DENO_APP_BIN_PATH")
-    if _deno_env_path:
-        DENO_APP_BIN_PATH: Path = Path(_deno_env_path)
-    else:
-        DENO_APP_BIN_PATH: Path = APP_BIN_DIR / "deno"
-
 # FFmpeg download links (Essentials build - always latest version)
 FFMPEG_7Z_DOWNLOAD_URL = "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.7z"
 FFMPEG_ZIP_DOWNLOAD_URL = "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip"
@@ -236,5 +216,3 @@ else:
         # Ensure parent directories exist for custom paths
         if "YTDLP_APP_BIN_PATH" in globals():
             YTDLP_APP_BIN_PATH.parent.mkdir(parents=True, exist_ok=True)
-        if "DENO_APP_BIN_PATH" in globals():
-            DENO_APP_BIN_PATH.parent.mkdir(parents=True, exist_ok=True)

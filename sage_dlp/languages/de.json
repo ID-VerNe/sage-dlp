@@ -608,36 +608,5 @@
     "check_failed": "Versionprüfung fehlgeschlagen. Bitte überprüfen Sie Ihre Internetverbindung.",
     "description": "Überprüfen Sie Ihre FFmpeg-Version und vergleichen Sie sie mit der neuesten verfügbaren Version.",
     "guide_info": " Um FFmpeg zu installieren oder zu aktualisieren, <a href='https://github.com/oop7/ffmpeg-install-guide'>klicken Sie hier, um unseren umfassenden Installationsleitfaden anzuzeigen</a>."
-  },
-  "deno": {
-    "setup_required": "Deno-Einrichtung erforderlich",
-    "setup_description": "SageDLP benötigt Deno, um bestimmte Funktionen auszuführen.<br><br>Deno wurde im lokalen Verzeichnis der App nicht gefunden. SageDLP muss Deno für Ihr {os_name}-System einrichten.<br><br>Klicken Sie auf 'Deno einrichten', um es automatisch herunterzuladen und zu installieren.",
-    "setup_button": "Deno einrichten",
-    "downloading": "Deno wird heruntergeladen...",
-    "extracting": "Deno wird extrahiert...",
-    "verifying": "Deno wird überprüft...",
-    "success": "Deno wurde erfolgreich installiert!",
-    "download_failed": "Download fehlgeschlagen",
-    "download_error": "Deno konnte nicht heruntergeladen werden: {error}",
-    "verification_failed": "SHA256-Überprüfung fehlgeschlagen. Die heruntergeladene Datei ist möglicherweise beschädigt oder manipuliert.",
-    "setup_failed": "Deno konnte nicht eingerichtet werden. Einige Funktionen funktionieren möglicherweise nicht richtig.",
-    "setup_error": "Einrichtungsfehler"
-  },
-  "deno_updater": {
-    "title": "Deno Versionsprüfer & Updater",
-    "description": "Überprüfen Sie Ihre Deno-Version und aktualisieren Sie auf die neueste Version.",
-    "current_version": "Aktuelle Version:",
-    "latest_version": "Neueste Version:",
-    "status_idle": "Klicken Sie auf 'Nach Updates suchen', um zu beginnen",
-    "status_checking": "🔄 Suche nach Updates...",
-    "status_up_to_date": "✓ Aktuell",
-    "status_update_available": "⚠ Update verfügbar",
-    "status_not_installed": "✗ Nicht installiert",
-    "check_updates": "Nach Updates suchen",
-    "update_now": "Deno aktualisieren",
-    "updating": "🔄 Deno wird aktualisiert...",
-    "update_success": "✅ Deno wurde erfolgreich aktualisiert!",
-    "update_failed": "❌ Update fehlgeschlagen: {error}",
-    "check_failed": "Suche nach Updates fehlgeschlagen. Bitte überprüfen Sie Ihre Internetverbindung."
   }
 }

@@ -608,36 +608,5 @@
     "check_failed": "バージョンの確認に失敗しました。インターネット接続を確認してください。",
     "description": "FFmpegのバージョンを確認し、利用可能な最新バージョンと比較します。",
     "guide_info": " FFmpegをインストールまたは更新するには、<a href='https://github.com/oop7/ffmpeg-install-guide'>こちらをクリックして包括的なインストールガイドをご覧ください</a>。"
-  },
-  "deno": {
-    "setup_required": "Denoのセットアップが必要です",
-    "setup_description": "SageDLPは特定の機能を実行するためにDenoが必要です。<br><br>アプリのローカルディレクトリにDenoが見つかりませんでした。SageDLPはお使いの{os_name}システム用にDenoをセットアップする必要があります。<br><br>「Denoをセットアップ」をクリックして、自動的にダウンロードとインストールを行います。",
-    "setup_button": "Denoをセットアップ",
-    "downloading": "Denoをダウンロード中...",
-    "extracting": "Denoを展開中...",
-    "verifying": "Denoを検証中...",
-    "success": "Denoが正常にインストールされました！",
-    "download_failed": "ダウンロード失敗",
-    "download_error": "Denoのダウンロードに失敗しました：{error}",
-    "verification_failed": "SHA256検証に失敗しました。ダウンロードされたファイルが破損しているか、改ざんされている可能性があります。",
-    "setup_failed": "Denoのセットアップに失敗しました。一部の機能が正しく動作しない可能性があります。",
-    "setup_error": "セットアップエラー"
-  },
-  "deno_updater": {
-    "title": "Denoバージョンチェッカーとアップデーター",
-    "description": "Denoのバージョンを確認し、最新バージョンに更新します。",
-    "current_version": "現在のバージョン：",
-    "latest_version": "最新バージョン：",
-    "status_idle": "開始するには「更新を確認」をクリックしてください",
-    "status_checking": "🔄 更新を確認中...",
-    "status_up_to_date": "✓ 最新",
-    "status_update_available": "⚠ 更新が利用可能",
-    "status_not_installed": "✗ インストールされていません",
-    "check_updates": "更新を確認",
-    "update_now": "Denoを更新",
-    "updating": "🔄 Denoを更新中...",
-    "update_success": "✅ Denoが正常に更新されました！",
-    "update_failed": "❌ 更新が失敗しました：{error}",
-    "check_failed": "更新の確認に失敗しました。インターネット接続を確認してください。"
   }
 }

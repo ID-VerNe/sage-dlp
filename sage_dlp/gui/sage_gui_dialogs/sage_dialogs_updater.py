@@ -29,7 +29,6 @@ from ...core.sage_utils import (
     update_auto_update_settings,
 )
 from ...core.sage_yt_dlp import get_yt_dlp_path
-from ...core.sage_deno import check_deno_update, upgrade_deno
 from .sage_dialogs_update import YTDLPUpdateDialog
 from ...utils.sage_config_manager import ConfigManager
 from ...utils.sage_localization import _
@@ -179,31 +178,6 @@ class FFmpegCheckThread(QThread):
             self.error.emit(str(e))
 
 
-class DenoCheckThread(QThread):
-    finished = Signal(bool, str, str)
-    error = Signal(str)
-
-    def run(self):
-        try:
-            update_available, current_version, latest_version = check_deno_update()
-            self.finished.emit(update_available, current_version, latest_version)
-        except Exception as e:
-            logger.exception(f"Error checking Deno version: {e}")
-            self.error.emit(str(e))
-
-
-class DenoUpdateThread(QThread):
-    finished = Signal(bool, str)
-    progress = Signal(str)
-    error = Signal(str)
-
-    def run(self):
-        try:
-            success, output = upgrade_deno(progress_callback=self.progress.emit)
-            self.finished.emit(success, output)
-        except Exception as e:
-            logger.exception(f"Error updating Deno: {e}")
-            self.error.emit(str(e))
 
 
 
@@ -322,75 +296,7 @@ class UpdaterTabWidget(QWidget):
         
         layout.addWidget(ffmpeg_group)
         
-        # === Deno Version Check & Update Section ===
-        deno_group = QGroupBox(_('deno_updater.title'))
-        deno_layout = QVBoxLayout(deno_group)
         
-        # Description
-        deno_desc = QLabel(_('deno_updater.description'))
-        deno_desc.setWordWrap(True)
-        deno_desc.setStyleSheet("color: #64748b; padding: 10px;")
-        deno_layout.addWidget(deno_desc)
-        
-        # Version information layout
-        deno_version_layout = QVBoxLayout()
-        
-        # Current version
-        deno_current_layout = QHBoxLayout()
-        deno_current_label = QLabel(_('deno_updater.current_version'))
-        deno_current_label.setStyleSheet("font-weight: bold; color: #0f172a;")
-        deno_current_layout.addWidget(deno_current_label)
-        
-        self.deno_current_version_label = QLabel("...")
-        self.deno_current_version_label.setStyleSheet("color: #64748b;")
-        deno_current_layout.addWidget(self.deno_current_version_label)
-        deno_current_layout.addStretch()
-        deno_version_layout.addLayout(deno_current_layout)
-        
-        # Latest version
-        deno_latest_layout = QHBoxLayout()
-        deno_latest_label = QLabel(_('deno_updater.latest_version'))
-        deno_latest_label.setStyleSheet("font-weight: bold; color: #0f172a;")
-        deno_latest_layout.addWidget(deno_latest_label)
-        
-        self.deno_latest_version_label = QLabel("...")
-        self.deno_latest_version_label.setStyleSheet("color: #64748b;")
-        deno_latest_layout.addWidget(self.deno_latest_version_label)
-        deno_latest_layout.addStretch()
-        deno_version_layout.addLayout(deno_latest_layout)
-        
-        deno_layout.addLayout(deno_version_layout)
-        
-        # Status label
-        self.deno_status_label = QLabel(_('deno_updater.status_idle'))
-        self.deno_status_label.setWordWrap(True)
-        self.deno_status_label.setStyleSheet(
-            "color: #64748b; font-size: 12px; padding: 8px; "
-            "background-color: #eff4fa; border-radius: 8px; margin: 5px 0;"
-        )
-        deno_layout.addWidget(self.deno_status_label)
-        
-        # Buttons layout
-        deno_button_layout = QHBoxLayout()
-        
-        # Check for updates button
-        self.deno_check_button = QPushButton(_('deno_updater.check_updates'))
-        self.deno_check_button.clicked.connect(self.check_deno_updates)
-        self.deno_check_button.setStyleSheet(primary_button_qss(min_width="120px"))
-        deno_button_layout.addWidget(self.deno_check_button)
-        
-        # Update button (initially hidden)
-        self.deno_update_button = QPushButton(_('deno_updater.update_now'))
-        self.deno_update_button.clicked.connect(self.update_deno)
-        self.deno_update_button.setVisible(False)
-        self.deno_update_button.setStyleSheet(primary_button_qss(min_width="120px"))
-        deno_button_layout.addWidget(self.deno_update_button)
-        
-        deno_button_layout.addStretch()
-        deno_layout.addLayout(deno_button_layout)
-        
-        layout.addWidget(deno_group)
-
         # === App Updates Section ===
         app_update_group = QGroupBox(_("settings.app_updates_title"))
         app_update_layout = QVBoxLayout()
@@ -775,131 +681,3 @@ class UpdaterTabWidget(QWidget):
             "color: #ff6666; font-size: 12px; padding: 8px; "
             "background-color: #eff4fa; border-radius: 8px; margin: 5px 0;"
         )
-    
-    def check_deno_updates(self) -> None:
-        """Check for Deno updates."""
-        self.deno_check_button.setEnabled(False)
-        self.deno_update_button.setVisible(False)
-        self.deno_status_label.setText(_('deno_updater.status_checking'))
-        self.deno_status_label.setStyleSheet(
-            "color: #ffaa00; font-size: 12px; padding: 8px; "
-            "background-color: #eff4fa; border-radius: 8px; margin: 5px 0;"
-        )
-        
-        self.deno_check_thread = DenoCheckThread()
-        self.deno_check_thread.finished.connect(self._on_deno_check_finished)
-        self.deno_check_thread.error.connect(self._on_deno_check_error)
-        self.deno_check_thread.start()
-
-    @Slot(bool, str, str)
-    def _on_deno_check_finished(self, update_available, current_version, latest_version):
-        self.deno_check_button.setEnabled(True)
-        self._update_deno_check_results(update_available, current_version, latest_version)
-
-    @Slot(str)
-    def _on_deno_check_error(self, error):
-        self.deno_check_button.setEnabled(True)
-        self._show_deno_check_error(error)
-    
-    def _update_deno_check_results(self, update_available: bool, current_version: str, latest_version: str) -> None:
-        """Handle completion of Deno version check."""
-        # Update version labels
-        self.deno_current_version_label.setText(current_version)
-        self.deno_latest_version_label.setText(latest_version)
-        
-        # Update status
-        if current_version in ["Not found", "Error getting version"]:
-            self.deno_status_label.setText(_('deno_updater.status_not_installed'))
-            self.deno_status_label.setStyleSheet(
-                "color: #ff6666; font-size: 12px; padding: 8px; "
-                "background-color: #eff4fa; border-radius: 8px; margin: 5px 0;"
-            )
-        elif update_available:
-            self.deno_status_label.setText(_('deno_updater.status_update_available'))
-            self.deno_status_label.setStyleSheet(
-                "color: #ffaa00; font-size: 12px; padding: 8px; "
-                "background-color: #eff4fa; border-radius: 8px; margin: 5px 0;"
-            )
-            # Show update button
-            self.deno_update_button.setVisible(True)
-        else:
-            self.deno_status_label.setText(_('deno_updater.status_up_to_date'))
-            self.deno_status_label.setStyleSheet(
-                "color: #00cc00; font-size: 12px; padding: 8px; "
-                "background-color: #eff4fa; border-radius: 8px; margin: 5px 0;"
-            )
-    
-    def _show_deno_check_error(self, error: str) -> None:
-        """Handle error during Deno version check."""
-        self.deno_status_label.setText(_('deno_updater.check_failed'))
-        self.deno_status_label.setStyleSheet(
-            "color: #ff6666; font-size: 12px; padding: 8px; "
-            "background-color: #eff4fa; border-radius: 8px; margin: 5px 0;"
-        )
-    
-    def update_deno(self) -> None:
-        """Update Deno to the latest version."""
-        self.deno_check_button.setEnabled(False)
-        self.deno_update_button.setEnabled(False)
-        self.deno_status_label.setText(_('deno_updater.updating'))
-        self.deno_status_label.setStyleSheet(
-            "color: #ffaa00; font-size: 12px; padding: 8px; "
-            "background-color: #eff4fa; border-radius: 8px; margin: 5px 0;"
-        )
-        
-        # Use QThread for updates with progress reporting
-        self.deno_update_thread = DenoUpdateThread()
-        self.deno_update_thread.progress.connect(self._on_deno_update_progress)
-        self.deno_update_thread.finished.connect(self._on_deno_update_finished)
-        self.deno_update_thread.error.connect(self._on_deno_update_error)
-        self.deno_update_thread.start()
-
-    @Slot(str)
-    def _on_deno_update_progress(self, message: str) -> None:
-        """Handle Deno update progress messages."""
-        # Clean up message for display
-        # Strip ANSI escape codes (colors)
-        ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
-        display_msg = ansi_escape.sub('', message).strip()
-
-        if not display_msg:
-            return
-            
-        # If message is too long, truncate it
-        if len(display_msg) > 70:
-            display_msg = display_msg[:67] + "..."
-            
-        self.deno_status_label.setText(display_msg)
-
-    @Slot(bool, str)
-    def _on_deno_update_finished(self, success: bool, output: str) -> None:
-        self.deno_check_button.setEnabled(True)
-        self.deno_update_button.setEnabled(True)
-        self._handle_deno_update_result(success, output)
-
-    @Slot(str)
-    def _on_deno_update_error(self, error: str) -> None:
-        self.deno_check_button.setEnabled(True)
-        self.deno_update_button.setEnabled(True)
-        self._handle_deno_update_result(False, error)
-    
-    def _handle_deno_update_result(self, success: bool, output: str) -> None:
-        """Handle Deno update completion."""
-        if success:
-            self.deno_status_label.setText(_('deno_updater.update_success'))
-            self.deno_status_label.setStyleSheet(
-                "color: #00cc00; font-size: 12px; padding: 8px; "
-                "background-color: #eff4fa; border-radius: 8px; margin: 5px 0;"
-            )
-            self.deno_update_button.setVisible(False)
-            
-            # Re-check version to update display
-            self.check_deno_updates()
-        else:
-            # Extract meaningful error from output
-            error_msg = output if output else "Unknown error"
-            self.deno_status_label.setText(_('deno_updater.update_failed', error=error_msg))
-            self.deno_status_label.setStyleSheet(
-                "color: #ff6666; font-size: 12px; padding: 8px; "
-                "background-color: #eff4fa; border-radius: 8px; margin: 5px 0;"
-            )

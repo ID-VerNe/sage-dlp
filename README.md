@@ -10,7 +10,7 @@
 pip install sage-dlp
 ```
 
-需要 Python 3.10-3.14。首次启动时自动下载 Deno、FFmpeg、yt-dlp，无需手动配置工具链。
+需要 Python 3.10-3.14。首次启动时自动下载 FFmpeg、yt-dlp，无需手动配置工具链。
 
 ## 功能
 
@@ -20,7 +20,7 @@ pip install sage-dlp
 
 - **json3 转 SRT 管线。** 解析 YouTube 专有的 `.json3` 字幕格式，提取为扁平词序列，再通过分割引擎生成时序正确、语法合理的 SRT 文件。
 
-- **自举依赖。** 自动下载并校验 Deno、FFmpeg、yt-dlp 的 SHA256 校验和，无需预装任何工具。
+- **自举依赖。** 自动下载并校验 FFmpeg、yt-dlp 的 SHA256 校验和，无需预装任何工具。
 
 - **配套浏览器扩展。** Chrome/Edge 扩展自动检测 YouTube 标签页的 Cookie 并推送到本地 HTTP 服务器，无需手动导出 Cookie 文件。
 
@@ -29,7 +29,7 @@ pip install sage-dlp
 ## 快速上手
 
 1. 通过 pip 安装，然后运行 `sage-dlp`。
-2. 首次运行自动下载 FFmpeg、yt-dlp 和 Deno。
+2. 首次运行自动下载 FFmpeg、yt-dlp。
 3. 粘贴 YouTube 链接，应用自动获取可用格式和字幕轨道。
 4. 选择格式和字幕语言，点击下载。
 5. 如需 LLM 字幕分割，在设置中配置 API 端点和密钥。

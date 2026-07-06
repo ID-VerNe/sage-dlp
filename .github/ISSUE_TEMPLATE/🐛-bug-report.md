@@ -34,7 +34,6 @@ assignees: ''
 - **yt-dlp Version**: <!-- e.g., 2025.11.12 -->
 - **OS**: <!-- e.g., Windows 11, macOS Ventura, Ubuntu 22.04 -->
 - **Python Version**: <!-- e.g., 3.13.6 -->
-- **Deno Version**: <!-- e.g., 2.5.6 -->
 - **FFmpeg Version**: <!-- Run `ffmpeg -version` -->
 - **Installation Method**: <!-- - pip - executable - manual -->
 

@@ -608,36 +608,5 @@
     "check_failed": "Échec de la vérification de la version. Vérifiez votre connexion Internet.",
     "description": "Vérifiez votre version de FFmpeg et comparez-la avec la dernière version disponible.",
     "guide_info": " Pour installer ou mettre à jour FFmpeg, <a href='https://github.com/oop7/ffmpeg-install-guide'>cliquez ici pour consulter notre guide d'installation complet</a>."
-  },
-  "deno": {
-    "setup_required": "Configuration de Deno requise",
-    "setup_description": "SageDLP nécessite Deno pour exécuter certaines fonctionnalités.<br><br>Deno n'a pas été trouvé dans le répertoire local de l'application. SageDLP doit configurer Deno pour votre système {os_name}.<br><br>Cliquez sur 'Configurer Deno' pour télécharger et installer automatiquement.",
-    "setup_button": "Configurer Deno",
-    "downloading": "Téléchargement de Deno...",
-    "extracting": "Extraction de Deno...",
-    "verifying": "Vérification de Deno...",
-    "success": "Deno a été installé avec succès !",
-    "download_failed": "Échec du téléchargement",
-    "download_error": "Échec du téléchargement de Deno : {error}",
-    "verification_failed": "Échec de la vérification SHA256. Le fichier téléchargé peut être corrompu ou altéré.",
-    "setup_failed": "Échec de la configuration de Deno. Certaines fonctionnalités peuvent ne pas fonctionner correctement.",
-    "setup_error": "Erreur de configuration"
-  },
-  "deno_updater": {
-    "title": "Vérificateur et Mise à Jour de Version Deno",
-    "description": "Vérifiez votre version de Deno et mettez à jour vers la dernière version.",
-    "current_version": "Version Actuelle :",
-    "latest_version": "Dernière Version :",
-    "status_idle": "Cliquez sur 'Vérifier les Mises à Jour' pour commencer",
-    "status_checking": "🔄 Vérification des mises à jour...",
-    "status_up_to_date": "✓ À jour",
-    "status_update_available": "⚠ Mise à jour disponible",
-    "status_not_installed": "✗ Non installé",
-    "check_updates": "Vérifier les Mises à Jour",
-    "update_now": "Mettre à Jour Deno",
-    "updating": "🔄 Mise à jour de Deno...",
-    "update_success": "✅ Deno a été mis à jour avec succès !",
-    "update_failed": "❌ Échec de la mise à jour : {error}",
-    "check_failed": "Échec de la vérification des mises à jour. Veuillez vérifier votre connexion Internet."
   }
 }

@@ -27,9 +27,8 @@ from ...utils.sage_logger import logger
 from ...utils.sage_constants import APP_LOG_DIR
 
 from ...core.sage_ffmpeg import get_ffmpeg_path
-from ...core.sage_utils import _version_cache, check_ffmpeg, get_ffmpeg_version, get_ytdlp_version, get_deno_version, refresh_version_cache
-from ...core.sage_yt_dlp import check_ytdlp_installed, get_yt_dlp_path, check_ytdlp_deno_integration
-from ...core.sage_deno import check_deno_installed, get_deno_path
+from ...core.sage_utils import _version_cache, check_ffmpeg, get_ffmpeg_version, get_ytdlp_version, refresh_version_cache
+from ...core.sage_yt_dlp import check_ytdlp_installed, get_yt_dlp_path
 
 
 # ═══════════════════════════════════════════════════════
@@ -370,22 +369,7 @@ class SystemInfoThread(QThread):
         # FFmpeg cache status
         ffmpeg_cache = _version_cache.get("ffmpeg", {})
         info['ffmpeg_last_check'] = ffmpeg_cache.get("last_check", 0)
-        
-        # Deno Status
-        deno_found = check_deno_installed()
-        info['deno_found'] = deno_found
-        info['deno_version'] = get_deno_version() if deno_found else _('about.not_available')
-        info['deno_path'] = get_deno_path() if deno_found else None
-        
-        # Deno cache status
-        deno_cache = _version_cache.get("deno", {})
-        info['deno_last_check'] = deno_cache.get("last_check", 0)
 
-        # Check integration with yt-dlp if both are present
-        info['integration_status'] = False
-        if deno_found and ytdlp_found:
-             info['integration_status'] = check_ytdlp_deno_integration()
-             
         self.info_ready.emit(info)
 
 

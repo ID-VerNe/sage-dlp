@@ -608,36 +608,5 @@
     "check_failed": "Gagal memeriksa versi. Periksa koneksi internet Anda.",
     "description": "Periksa versi FFmpeg Anda dan bandingkan dengan versi terbaru yang tersedia.",
     "guide_info": " Untuk menginstal atau memperbarui FFmpeg, <a href='https://github.com/oop7/ffmpeg-install-guide'>klik di sini untuk melihat panduan instalasi lengkap kami</a>."
-  },
-  "deno": {
-    "setup_required": "Pengaturan Deno Diperlukan",
-    "setup_description": "SageDLP memerlukan Deno untuk menjalankan fitur tertentu.<br><br>Deno tidak ditemukan di direktori lokal aplikasi. SageDLP perlu mengatur Deno untuk sistem {os_name} Anda.<br><br>Klik 'Atur Deno' untuk mengunduh dan menginstal secara otomatis.",
-    "setup_button": "Atur Deno",
-    "downloading": "Mengunduh Deno...",
-    "extracting": "Mengekstrak Deno...",
-    "verifying": "Memverifikasi Deno...",
-    "success": "Deno berhasil diinstal!",
-    "download_failed": "Unduhan Gagal",
-    "download_error": "Gagal mengunduh Deno: {error}",
-    "verification_failed": "Verifikasi SHA256 gagal. File yang diunduh mungkin rusak atau dimanipulasi.",
-    "setup_failed": "Gagal mengatur Deno. Beberapa fitur mungkin tidak berfungsi dengan benar.",
-    "setup_error": "Kesalahan Pengaturan"
-  },
-  "deno_updater": {
-    "title": "Pemeriksa & Pembaruan Versi Deno",
-    "description": "Periksa versi Deno Anda dan perbarui ke rilis terbaru.",
-    "current_version": "Versi Saat Ini:",
-    "latest_version": "Versi Terbaru:",
-    "status_idle": "Klik 'Periksa Pembaruan' untuk memulai",
-    "status_checking": "🔄 Memeriksa pembaruan...",
-    "status_up_to_date": "✓ Terbaru",
-    "status_update_available": "⚠ Pembaruan tersedia",
-    "status_not_installed": "✗ Tidak terinstal",
-    "check_updates": "Periksa Pembaruan",
-    "update_now": "Perbarui Deno",
-    "updating": "🔄 Memperbarui Deno...",
-    "update_success": "✅ Deno telah berhasil diperbarui!",
-    "update_failed": "❌ Pembaruan gagal: {error}",
-    "check_failed": "Gagal memeriksa pembaruan. Harap periksa koneksi internet Anda."
   }
 }
