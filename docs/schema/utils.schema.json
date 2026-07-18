@@ -1,0 +1,37 @@
+{
+  "module": "utils",
+  "version": "5.2.0",
+  "exports": {
+    "sage_config_manager": [
+      { "name": "ConfigManager", "kind": "class", "methods": ["get", "set", "delete", "_load", "_save"] }
+    ],
+    "sage_localization": [
+      { "name": "LocalizationManager", "kind": "class", "methods": ["initialize", "get_text", "set_language", "get_available_languages"] },
+      { "name": "_", "kind": "function", "params": ["key", "**kwargs"], "returns": "str" }
+    ],
+    "sage_cookie_server": [
+      { "name": "CookieServer", "kind": "class", "bases": ["QObject"], "signals": ["cookies_received"], "methods": ["start", "stop"] }
+    ],
+    "sage_history_manager": [
+      { "name": "HistoryManager", "kind": "class", "methods": ["add_entry", "get_all_entries", "get_entry", "remove_entry", "clear_history", "search_entries"] }
+    ],
+    "sage_logger": [
+      { "name": "logger", "kind": "instance", "type": "loguru.logger" }
+    ],
+    "sage_constants": [
+      { "name": "VIDEO_EXTENSIONS", "kind": "constant", "value": "set[str]" },
+      { "name": "AUDIO_EXTENSIONS", "kind": "constant", "value": "set[str]" },
+      { "name": "SUBTITLE_EXTENSIONS", "kind": "constant", "value": "set[str]" },
+      { "name": "MEDIA_EXTENSIONS", "kind": "constant", "value": "set[str]" }
+    ],
+    "sage_flow_layout": [
+      { "name": "FlowLayout", "kind": "class", "bases": ["QLayout"] }
+    ]
+  },
+  "dependencies": {
+    "internal": [],
+    "external": ["PySide6", "loguru", "sqlite3"]
+  },
+  "consumers": ["core", "gui", "main"],
+  "entryPoints": ["sage_dlp/utils/sage_config_manager.py", "sage_dlp/utils/sage_cookie_server.py"]
+}

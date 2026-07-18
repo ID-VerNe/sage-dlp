@@ -5,19 +5,7 @@
     "current_language": "Current language: {language}",
     "restart_required": "Language changes will take effect after restarting the application.",
     "english": "English",
-    "spanish": "Español (Spanish)",
-    "portuguese": "Português (Portuguese)",
-    "russian": "Русский (Russian)",
     "chinese": "中文 (简体) (Chinese Simplified)",
-    "german": "Deutsch (German)",
-    "french": "Français (French)",
-    "hindi": "हिन्दी (Hindi)",
-    "indonesian": "Bahasa Indonesia (Indonesian)",
-    "turkish": "Türkçe (Turkish)",
-    "polish": "Polski (Polish)",
-    "italian": "Italiano (Italian)",
-    "arabic": "العربية (Arabic)",
-    "japanese": "日本語 (Japanese)",
     "help_text": "Select your preferred language for the interface.",
     "restart_notice": "Language change will take effect after restarting the application."
   },
@@ -79,6 +67,7 @@
     "select_videos": "Select Videos...",
     "video": "Video",
     "audio_only": "Audio Only",
+    "subtitle_only": "Subtitles",
     "custom_options": "Custom Options",
     "trim_video": "Trim Video",
     "download_settings": "Download Settings",
@@ -412,6 +401,10 @@
     "zero_selected": "0 selected",
     "analyze_first_tooltip": "Please analyze the video first",
     "audio_mode_disabled": "Not available in audio-only mode",
+    "subtitle_only_mode": "Subtitles-only mode",
+    "subtitle_only_tooltip": "Download only word-level timestamped subtitles (json3) and run the segmentation pipeline to produce precisely segmented SRT",
+    "subtitle_only_require_subs": "Subtitles-only mode requires at least one subtitle language selected",
+    "subtitle_only_llm_auto_enabled": "Subtitles-only mode auto-enables smart segmentation",
     "select_subtitles_first": "Please select subtitles first",
     "settings_tooltip": "Current Path: {path}\nSpeed Limit: {speed_limit}",
     "speed_limit_none": "None",
@@ -485,7 +478,9 @@
     "download_failed_return_code_conflict": "Download failed with return code {return_code}. This may be due to a conflict with multiple yt-dlp installations. Try uninstalling any system-installed yt-dlp (e.g. through snap or apt) and restart the application.",
     "download_failed_return_code": "Download failed with return code {return_code}",
     "direct_command_error": "Error in direct command: {error}",
-    "timeout": "Operation timed out"
+    "timeout": "Operation timed out",
+    "deno_not_found": "JavaScript runtime (deno) not found. yt-dlp requires deno to solve YouTube challenges when using cookies. The app will try to install it automatically.",
+    "js_runtime_missing": "⚠️ JavaScript runtime missing. Deno is required for YouTube cookie authentication to work properly."
   },
   "update_dialog": {
     "title": "Update Available",
@@ -632,7 +627,16 @@
     "check_updates": "Check Version",
     "check_failed": "Failed to check version. Please check your internet connection.",
     "description": "Check your FFmpeg version and compare it with the latest available version.",
-    "guide_info": " To install or update FFmpeg, <a href='https://github.com/oop7/ffmpeg-install-guide'>click here to view our comprehensive installation guide</a>."
+    "guide_info": " To install or update FFmpeg, <a href='https://github.com/oop7/ffmpeg-install-guide'>click here to view our comprehensive installation guide</a>.",
+    "deno_title": "Deno Runtime",
+    "deno_current_version": "Current version:",
+    "deno_install": "Install Deno",
+    "deno_reinstall": "Reinstall Deno",
+    "deno_installing": "Installing...",
+    "deno_installed": "✅ Deno is installed",
+    "deno_not_installed": "❌ Deno is not installed. yt-dlp requires Deno to solve YouTube challenges when cookies are used.",
+    "deno_downloading": "Downloading Deno... {percent}%",
+    "deno_download_failed": "Download failed: {error}"
   },
   "llm": {
     "tab_title": "LLM Smart Segmentation",
@@ -678,5 +682,12 @@
     "checkbox_tooltip": "Enable LLM-powered subtitle segmentation (requires LLM config first)",
     "in_progress": "LLM segmentation in progress...",
     "complete": "LLM segmentation complete"
+  },
+  "subtitle_only": {
+    "downloading": "Downloading word-level timestamped subtitles...",
+    "segmenting": "Running segmentation pipeline to produce precise SRT...",
+    "complete": "Precisely segmented SRT generated: {path}",
+    "no_json3": "No json3 subtitle file found, cannot generate SRT",
+    "segment_failed": "Segmentation failed: {error}"
   }
 }

@@ -143,6 +143,13 @@ class SubtitlesProcessor:
         if self.lang == 'en':
             text = "".join([c for c in text if ord(c) < 128 or c == '…'])
 
+        # 清除 ASR 指示符号：">>", ">", 行首/行中的箭头标记
+        text = re.sub(r'>+', '', text)
+
+        # 清除方括号标注（如 [music], [applause], [laughter], [音乐], [掌声]）
+        # 同时清除方括号内可能的前导/尾随空白
+        text = re.sub(r'\[\s*[^\]]*\s*\]', '', text)
+
         # Apply configurable ASR repairs
         asr_repairs = self.llm_config.get('asr_repairs', self.DEFAULT_ASR_REPAIRS)
         for pattern, replacement, flags in asr_repairs:
@@ -158,6 +165,9 @@ class SubtitlesProcessor:
         # Clean stutters
         text = re.sub(r'\b(\w+)\s+\1\b', r'\1', text, flags=re.IGNORECASE)
         text = re.sub(r'\b(And|But|So|To|Which|Because|With|That|Upon|Where|If|When)\.\s+', r'\1 ', text)
+
+        # 清除完标记后可能出现多余空白，统一压缩
+        text = re.sub(r'\s{2,}', ' ', text)
 
         return text.strip()
 
@@ -187,6 +197,7 @@ class SubtitlesProcessor:
         line2 = " ".join([w['word'] for w in words[best_idx:]])
         return f"{line1}\n{line2}"
 
+    # @lat: [[Core#sage_subtitle_processor]]
     def process_segments(self):
         if self.mode == 'raw':
             subtitles = []

@@ -25,7 +25,6 @@ to http://localhost:9876/api/cookies whenever cookies change on the active tab.
 import http.server
 import json
 import logging
-import socket
 import threading
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -91,7 +90,11 @@ class _CookieRequestHandler(http.server.BaseHTTPRequestHandler):
             return
 
         try:
-            length = int(self.headers.get("Content-Length", 0))
+            raw_length = self.headers.get("Content-Length", "0")
+            length = int(raw_length)
+            if length <= 0:
+                self._respond(400, {"error": "Invalid Content-Length"})
+                return
             body = self.rfile.read(length)
             data: dict = json.loads(body)
         except (json.JSONDecodeError, ValueError, OSError):
@@ -123,7 +126,10 @@ class _CookieRequestHandler(http.server.BaseHTTPRequestHandler):
 
         # Derive a safe filename from the URL hostname
         try:
-            host = socket.gethostbyname(url.split("/")[2]) if "//" in url else "unknown"
+            # Extract hostname from URL — no DNS resolution (avoids DNS leak / blocking)
+            host = url.split("/")[2] if "//" in url else "unknown"
+            # Sanitize: keep only safe chars for a filename
+            host = "".join(c if c.isalnum() or c in ".-_" else "_" for c in host)
         except Exception:
             host = "unknown"
         from datetime import datetime
@@ -220,6 +226,7 @@ class CookieServer(QObject):
     # Public API
     # ------------------------------------------------------------------ #
 
+    # @lat: [[Utils#sage_cookie_server]]
     def start(self, port: int = COOKIE_SERVER_PORT) -> bool:
         """Start the server on *port*.  Returns True on success."""
         if self._server is not None:
@@ -240,6 +247,10 @@ class CookieServer(QObject):
             return
         try:
             self._server.shutdown()
+            try:
+                self._server.join(timeout=2)
+            except Exception:
+                pass
         except Exception:
             pass
         self._server = None

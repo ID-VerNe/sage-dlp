@@ -4,6 +4,7 @@ class RuleSegmenter:
     def __init__(self, processor):
         self.p = processor
 
+    # @lat: [[Core#sage_logic_rule]]
     def process(self, flat_words):
         """v39: Physics First, Stability Boost, No Hanging Preps."""
         # 1. Natural grouping with Unyielding Bridge

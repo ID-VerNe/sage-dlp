@@ -95,6 +95,13 @@ class AnalysisThread(QThread):
         if self.geo_proxy_url:
             cmd.extend(["--geo-verification-proxy", self.geo_proxy_url])
 
+    def _check_deno_and_emit_warning(self) -> None:
+        """Check if deno is available and emit a warning if browser cookies are set but deno is missing."""
+        from ..core.sage_deno import check_deno_binary
+        # Deno is only required for browser-extracted cookies, not static cookie files
+        if self.browser_cookies_option and not check_deno_binary():
+            self.status_update.emit(_("errors.js_runtime_missing"))
+
     def _analyze_url_with_subprocess(self, url: str) -> None:
         """Analyze URL using yt-dlp executable."""
         if self._cancelled:
@@ -110,6 +117,9 @@ class AnalysisThread(QThread):
 
         self.status_update.emit(_("main_ui.analyzing_extracting_ytdlp"))
         self.progress_update.emit(30)  # This will trigger fake progress in UI
+
+        # Warn if cookies are set but deno is missing
+        self._check_deno_and_emit_warning()
 
         # Build command for basic info extraction
         cmd = [yt_dlp_path, "--dump-single-json", "--flat-playlist", "--no-warnings", url]
@@ -196,6 +206,12 @@ class AnalysisThread(QThread):
             self.progress_update.emit(70)
             first_video_entry = playlist_entries[0]
             first_video_url = first_video_entry.get("url")
+            if not first_video_url:
+                logger.error("Could not get URL for the first playlist video.")
+                self.analysis_error.emit(_("errors.playlist_no_url"))
+                self.playlist_info_visible.emit(False)
+                self.playlist_select_btn_visible.emit(False)
+                return
 
             cmd_single = [yt_dlp_path, "--dump-single-json", "--no-warnings", first_video_url]
             self._add_auth_options(cmd_single)
@@ -464,4 +480,7 @@ class AnalysisMixin:
     def _on_analysis_finished(self) -> None:
         """Handle analysis thread completion - runs in main thread."""
         self = cast("SageApp", self)
+        if self._analysis_timer:
+            self._analysis_timer.stop()
+            self._analysis_timer = None
         self.is_analyzing = False

@@ -2,9 +2,11 @@ import gc
 import os
 import re
 import shlex  # For safely parsing command arguments
+import shutil
 import signal
 import subprocess  # For direct CLI command execution
 import sys
+import tempfile
 import time
 from pathlib import Path
 from typing import Optional, List, Set
@@ -26,6 +28,7 @@ from ..utils.sage_logger import logger
 _ = LocalizationManager.get_text
 
 
+# @lat: [[Core#sage_downloader]]
 class SignalManager(QObject):
     update_formats = Signal(list)
     update_status = Signal(str)
@@ -74,6 +77,7 @@ class DownloadThread(QThread):
         audio_normalization=False,
         filename_format=None,
         concurrent_fragments=1,
+        subtitle_only_mode=False,
     ) -> None:
         super().__init__()
         self.url = url
@@ -102,6 +106,8 @@ class DownloadThread(QThread):
         self.audio_normalization = audio_normalization
         self.filename_format = filename_format
         self.concurrent_fragments = concurrent_fragments
+        # 仅字幕模式：跳过视频/音频下载，强制下载 json3 字幕并执行断句
+        self.subtitle_only_mode: bool = bool(subtitle_only_mode)
         # LLM segmentation
         self.llm_segment_enabled: bool = False
         self.llm_config: dict = {}
@@ -112,6 +118,11 @@ class DownloadThread(QThread):
         self.last_file_path: Optional[str] = None  # Initialize full file path storage
         self.subtitle_files: List[str] = []  # Track subtitle files that are created
         self.initial_subtitle_files: Set[Path] = set()  # Track initial subtitle files before download
+        # 字幕临时目录：每次下载独立创建，用于隔离 json3 文件，
+        # 避免共享下载目录下误抓到其他视频的 json3。
+        # 断句生成的 SRT 仍会输出到 self.path（用户下载目录），完成后清理此目录。
+        self.subtitle_temp_dir: Path = Path(tempfile.mkdtemp(prefix="sage_subs_"))
+        logger.info(f"[Download] subtitle temp dir created: {self.subtitle_temp_dir}")
 
     def cleanup_partial_files(self) -> None:
         """Delete any partial files including .part and unmerged format-specific files"""
@@ -241,6 +252,10 @@ class DownloadThread(QThread):
             cmd.extend(["-N", str(self.concurrent_fragments)])
             logger.debug(f"Using {self.concurrent_fragments} concurrent connections")
 
+        # 仅字幕模式：跳过视频/音频下载，只下载 json3 字幕
+        if self.subtitle_only_mode:
+            return self._build_subtitle_only_command(cmd)
+
         # Format selection strategy - use format ID if provided or fallback to resolution
         if self.is_playlist:
             # For playlists, specific format_id from the first video often fails for subsequent videos.
@@ -368,13 +383,19 @@ class DownloadThread(QThread):
                 if has_auto_generated:
                     cmd.append("--write-auto-subs")  # Include auto-generated subtitles
 
-                # Use json3 format for word-level timestamps (needed by LLM segmentation)
-                if self.llm_segment_enabled:
-                    cmd.extend(["--sub-format", "json3"])
+                # 只要选了字幕就强制使用 json3 格式（单词级时间戳，断句 pipeline 依赖）
+                # 不再依赖 llm_segment_enabled 开关 —— 选了字幕就自动走断句 pipeline
+                cmd.extend(["--sub-format", "json3"])
 
-                # Only embed subtitles if merge is enabled
+                # 注意：json3 会先下载到 self.path（与视频同目录），因为 yt-dlp 的
+                # --paths subtitle: 在 -o 含绝对路径时不可靠。断句前我们会按 video_id
+                # 精确匹配，把本次下载的 json3 移动到 self.subtitle_temp_dir 隔离处理，
+                # 断句完成后清理 temp dir，避免污染共享下载目录。
+
+                # merge_subs: json3 无法被 --embed-subs 直接嵌入，跳过 yt-dlp 的嵌入
+                # 断句生成的 SRT 可由用户手动嵌入，或后续用 ffmpeg 嵌入
                 if self.merge_subs:
-                    cmd.append("--embed-subs")
+                    logger.info("[Download] merge_subs 与 json3 断句 pipeline 不兼容，跳过 --embed-subs；将生成独立 SRT 文件")
 
         # Add description saving if enabled
         if self.save_description:
@@ -419,21 +440,105 @@ class DownloadThread(QThread):
 
         return cmd
 
+    def _build_subtitle_only_command(self, cmd: List[str]) -> List[str]:
+        """构建仅字幕模式的 yt-dlp 命令：跳过视频/音频下载，只下载 json3 字幕。
+
+        json3 是 YouTube 自动字幕的原生格式，包含每个单词的 tOffsetMs，
+        是单词级时间戳的来源，配合下游断句方案即可生成精确断句的 SRT。
+        """
+        logger.info(f"[SubtitleOnly] subtitle_langs={self.subtitle_langs} path={self.path} is_playlist={self.is_playlist}")
+        # 跳过视频/音频流下载
+        cmd.append("--skip-download")
+
+        # 解析字幕语言选择
+        lang_codes: List[str] = []
+        has_auto_generated = False
+        for sub_selection in self.subtitle_langs:
+            try:
+                lang_code = sub_selection.split(" - ")[0]
+                lang_codes.append(lang_code)
+                if "Auto-generated" in sub_selection:
+                    has_auto_generated = True
+            except Exception as e:
+                logger.exception(f"Could not parse subtitle selection '{sub_selection}': {e}")
+
+        # 至少需要写入字幕；用户选了"自动生成"则加 --write-auto-subs，否则只用手动字幕
+        if has_auto_generated:
+            cmd.append("--write-auto-subs")
+        else:
+            cmd.append("--write-subs")
+
+        if lang_codes:
+            cmd.extend(["--sub-langs", ",".join(lang_codes)])
+
+        # 强制使用 json3 格式以拿到单词级时间戳
+        cmd.extend(["--sub-format", "json3"])
+        # 不强制转换字幕格式（默认就是不转换；旧版 yt-dlp 不识别 --no-convert-subs）
+
+        # 输出模板：字幕下载到独立的临时目录，避免和共享下载目录下的旧 json3 冲突
+        # 断句生成的 SRT 最终会移动到 self.path（用户下载目录）
+        base_path: str = self.subtitle_temp_dir.as_posix()
+        filename_part = self.filename_format if self.filename_format else "%(title)s_%(resolution)s_[%(id)s].%(ext)s"
+
+        if self.is_playlist:
+            output_template: str = f"{base_path}/%(playlist_title)s/{filename_part}"
+        else:
+            import re as _re
+            filename_part = _re.sub(r'%\(playlist_index[^)]*\)[a-zA-Z0-9]*\s*(?:[-_]\s*)?', '', filename_part)
+            output_template = f"{base_path}/{filename_part}"
+
+        cmd.extend(["-o", str(output_template)])
+        cmd.append("--force-overwrites")
+
+        # 播放列表选项
+        if self.is_playlist and self.playlist_items:
+            cmd.extend(["--playlist-items", self.playlist_items])
+        if self.is_playlist:
+            cmd.append("--ignore-errors")
+            cmd.append("--no-abort-on-error")
+
+        # Cookie / 代理 / 限速 等通用选项
+        if self.cookie_file:
+            cmd.extend(["--cookies", str(self.cookie_file)])
+        elif self.browser_cookies:
+            cmd.extend(["--cookies-from-browser", self.browser_cookies])
+
+        if self.proxy_url:
+            cmd.extend(["--proxy", self.proxy_url])
+        if self.geo_proxy_url:
+            cmd.extend(["--geo-verification-proxy", self.geo_proxy_url])
+
+        if self.rate_limit:
+            cmd.extend(["-r", self.rate_limit])
+
+        if self.download_section:
+            cmd.extend(["--download-sections", self.download_section])
+            if self.force_keyframes:
+                cmd.append("--force-keyframes-at-cuts")
+
+        # 最终 URL
+        cmd.append(self.url)
+
+        logger.debug(f"Subtitle-only command: {' '.join(shlex.quote(str(a)) for a in cmd)}")
+        return cmd
+
     def run(self) -> None:
         try:
             logger.debug("Starting download thread")
 
+            # 记录下载开始时间，用于 _collect_json3_to_temp_dir 按 mtime 判断
+            # 哪些 json3 是本次下载产生的（--force-overwrites 会覆盖旧文件并更新 mtime）
+            self.download_start_time: float = time.time()
+
             # Get initial list of subtitle files to compare later
             self.initial_subtitle_files = set()
-            if self.merge_subs:
-                try:
-                    # Scan for existing subtitle files in the directory
-                    for file in self.path.rglob("*"):
-                        if file.suffix in {".vtt", ".srt"}:
-                            self.initial_subtitle_files.add(file)
-                    logger.debug(f"Found {len(self.initial_subtitle_files)} existing subtitle files before download")
-                except Exception as e:
-                    logger.exception(f"Error scanning for initial subtitle files: {e}")
+            try:
+                for file in self.path.rglob("*"):
+                    if file.suffix in {".vtt", ".srt", ".json3"}:
+                        self.initial_subtitle_files.add(file)
+                logger.debug(f"Found {len(self.initial_subtitle_files)} existing subtitle files before download")
+            except Exception as e:
+                logger.exception(f"Error scanning for initial subtitle files: {e}")
 
             # Use direct CLI command
             self._run_direct_command()
@@ -442,6 +547,10 @@ class DownloadThread(QThread):
             # Catch errors during setup
             logger.critical(f"Critical error in download thread: {e}", exc_info=True)
             self.error_signal.emit(f"Critical error in download thread: {e}")
+        finally:
+            # 兜底清理：确保任何路径下（异常/取消/失败）都会清理字幕临时目录。
+            # 正常成功路径下，断句完成后已经清理过；这里是防止异常路径泄漏 temp dir。
+            self.cleanup_subtitle_temp_dir()
 
     def _run_direct_command(self) -> None:
         """Run yt-dlp as a direct command line process instead of using Python API."""
@@ -497,6 +606,9 @@ class DownloadThread(QThread):
 
             # Wait for process to complete
             return_code: int = self.process.wait()
+            logger.info(f"[Download] yt-dlp exit code={return_code}, subtitle_only_mode={self.subtitle_only_mode}, llm_segment_enabled={self.llm_segment_enabled}")
+            if hasattr(self, 'error_lines') and self.error_lines:
+                logger.warning(f"[Download] captured error_lines (last 5): {self.error_lines[-5:]}")
 
             # Special handling for specific errors
             # return code 127 typically means command not found
@@ -506,7 +618,15 @@ class DownloadThread(QThread):
                 )
                 return
 
-            if return_code == 0 or (self.is_playlist and return_code != 0 and self.current_filename is not None):
+            # 仅字幕模式：即使 yt-dlp 返回非零（如部分警告），只要 temp dir 中存在
+            # json3 文件就视为成功，这样后续 LLM 断句仍能执行，不会直接报"下载失败"
+            subtitle_only_with_json3 = (
+                self.subtitle_only_mode
+                and any(self.subtitle_temp_dir.glob('*.json3'))
+            )
+            if (return_code == 0
+                or (self.is_playlist and return_code != 0 and self.current_filename is not None)
+                or subtitle_only_with_json3):
                 self.progress_signal.emit(100)
                 
                 # Robust file finding: Always search for the most recent file
@@ -560,21 +680,24 @@ class DownloadThread(QThread):
                 else:
                     self.status_signal.emit(_("download.completed"))
                 
-                # Clean up subtitle files if they were merged, with a small delay
-                # to ensure the embedding process has completed
-                if self.merge_subs:
-                    # Add a significant delay to ensure ffmpeg has released all file handles
-                    # and any post-processing is complete
-                    self.status_signal.emit(_("download.completed_cleaning"))
-                    time.sleep(3)  # Increased delay to 3 seconds
-                    self.cleanup_subtitle_files()
+                # merge_subs 不再使用 --embed-subs（json3 不支持嵌入），
+                # 因此不需要清理嵌入后的字幕文件；json3 和断句生成的 SRT 均保留
 
-                # LLM Segmentation post-processing (runs after download completes)
-                if self.llm_segment_enabled and return_code == 0:
+                # 字幕断句 pipeline：只要选了字幕就自动执行（不再需要单独勾选 LLM 断句）
+                # 仅字幕模式下，即使 yt-dlp 返回非零，只要 json3 存在也尝试
+                has_subtitles = bool(self.subtitle_langs)
+                should_segment = has_subtitles and (return_code == 0 or self.subtitle_only_mode)
+                if should_segment:
+                    # 确保断句配置存在（即使用户没勾 LLM 断句，也用默认配置走 pipeline）
+                    if not getattr(self, 'llm_config', None):
+                        from .sage_llm_segmenter import _default_llm_config
+                        self.llm_config = _default_llm_config()
                     try:
                         self._run_llm_segmentation()
                     except Exception as e:
                         logger.error(f"LLM segmentation failed: {e}")
+                    # 断句完成后清理字幕临时目录（SRT 已输出到 self.path）
+                    self.cleanup_subtitle_temp_dir()
 
                 self.finished_signal.emit()
             else:
@@ -610,7 +733,9 @@ class DownloadThread(QThread):
     def _parse_output_line(self, line: str) -> None:
         """Parse yt-dlp command output to update progress and status."""
         line = line.strip()
-        # logger.info(f"yt-dlp: {line}")  # Log all output - OPTIONALLY UNCOMMENT FOR VERBOSE DEBUG
+        # 把 yt-dlp 全部输出写入日志文件（DEBUG 级别），方便排查问题
+        if line:
+            logger.debug(f"yt-dlp | {line}")
 
         # Capture error lines
         if "ERROR:" in line:
@@ -677,8 +802,9 @@ class DownloadThread(QThread):
 
         # Detect subtitle file creation
         # Look for lines like "[info] Writing video subtitles to: filename.xx.vtt"
+        # 同时识别 json3 格式（仅字幕模式 / LLM 断句会用到）
         subtitle_match = re.search(
-            r"(?:Writing|Downloading) (?:video )?subtitles.*?(?:to|:)\s*(.+\.(?:vtt|srt))(?:\s|$)",
+            r"(?:Writing|Downloading) (?:video )?(?:auto )?subtitles.*?(?:to|:)\s*(.+\.(?:vtt|srt|json3))(?:\s|$)",
             line,
             re.IGNORECASE,
         )
@@ -825,45 +951,165 @@ class DownloadThread(QThread):
 
             self.update_details.emit("")  # Clear details label on completion
 
-    def _run_llm_segmentation(self) -> None:
-        """Run LLM segmentation post-processing on downloaded json3 files."""
-        from .sage_llm_segmenter import segment_with_llm, get_json3_path
+    def _collect_json3_to_temp_dir(self) -> None:
+        """普通模式下，把本次下载的 json3 文件从 self.path 移动到 temp dir 隔离。
 
-        # Determine output directory
-        output_dir = self.path
-        if not output_dir.exists():
-            logger.warning(f"Output directory does not exist: {output_dir}")
+        仅字幕模式的 json3 已经直接下载到 temp dir，无需调用此方法。
+        通过 video_id 精确匹配 + initial_subtitle_files 过滤，确保只移动本次下载
+        产生的 json3，不会误抓共享下载目录下其他视频或旧测试残留的 json3。
+        """
+        # 从 URL 提取 video_id
+        video_id = ""
+        try:
+            m = re.search(r'(?:v=|youtu\.be/|/embed/)([A-Za-z0-9_-]{6,})', self.url or "")
+            if m:
+                video_id = m.group(1)
+        except Exception:
+            pass
+
+        if not video_id:
+            logger.warning("[LLMSeg] 无法从 URL 提取 video_id，跳过 json3 收集")
             return
 
-        # Find json3 subtitle file
-        json3_path = get_json3_path(output_dir, "")
-        if not json3_path:
-            logger.info("No json3 subtitle file found for LLM segmentation")
-            return
-
-        # Determine language from first subtitle language
-        lang = 'en'
-        if self.subtitle_langs:
+        # 在 self.path 下找当前视频的 json3（精确匹配 video_id）
+        all_candidates = list(self.path.glob(f'*{video_id}*.json3'))
+        # 只保留本次下载产生的 json3（mtime > download_start_time）。
+        # 不能用 initial_subtitle_files 集合判断：--force-overwrites 会覆盖
+        # 同路径旧文件，覆盖后 Path 对象相同，集合比较无法区分新旧。
+        start_ts = getattr(self, "download_start_time", 0.0) or 0.0
+        candidates: list = []
+        skipped_old: list = []
+        for p in all_candidates:
             try:
-                lang = self.subtitle_langs[0].split(" - ")[0]
-            except Exception:
-                pass
-
-        # Output path: same name but .llm.srt extension
-        srt_path = json3_path.with_suffix('.llm.srt')
-
-        self.status_signal.emit("LLM segmentation in progress...")
-        logger.info(f"Starting LLM segmentation: {json3_path} -> {srt_path}")
-
-        segment_with_llm(
-            json3_path=json3_path,
-            output_srt_path=srt_path,
-            lang=lang,
-            llm_config=self.llm_config,
+                mtime = p.stat().st_mtime
+            except OSError as e:
+                logger.warning(f"[LLMSeg] 读取 mtime 失败 {p}: {e}")
+                skipped_old.append(p)
+                continue
+            if mtime > start_ts:
+                candidates.append(p)
+            else:
+                skipped_old.append(p)
+        logger.info(
+            f"[LLMSeg] 收集 json3 到 temp_dir: video_id={video_id}, "
+            f"all={len(all_candidates)}, new={len(candidates)}, "
+            f"skipped(old)={[p.name for p in skipped_old]}, "
+            f"start_ts={start_ts:.3f}"
         )
 
-        logger.info(f"LLM segmentation complete: {srt_path}")
-        self.status_signal.emit("LLM segmentation complete")
+        moved = 0
+        for src in candidates:
+            try:
+                dst = self.subtitle_temp_dir / src.name
+                # 用 shutil.move 而不是 Path.rename，兼容跨卷移动
+                shutil.move(str(src), str(dst))
+                moved += 1
+                logger.debug(f"[LLMSeg] 移动 {src.name} -> {dst}")
+            except Exception as e:
+                logger.warning(f"[LLMSeg] 移动 {src} 失败: {e}")
+        logger.info(f"[LLMSeg] 共移动 {moved} 个 json3 到 temp_dir")
+
+    def _run_llm_segmentation(self) -> None:
+        """Run LLM segmentation post-processing on downloaded json3 files.
+
+        普通模式下，json3 先下载到 self.path，本方法会先按 video_id 精确匹配
+        移动到 self.subtitle_temp_dir 隔离处理（避免误抓共享下载目录下其他视频
+        的 json3）。仅字幕模式的 json3 已经直接下载到 temp dir，无需移动。
+        断句生成的 SRT 输出到 self.path（用户下载目录），断句完成后清理 temp dir。
+        """
+        from .sage_llm_segmenter import segment_with_llm
+
+        # 普通模式：先把 json3 从 self.path 移到 temp dir 隔离
+        if not self.subtitle_only_mode:
+            self._collect_json3_to_temp_dir()
+
+        # json3 文件位于独立的临时目录，无需再用 video_id 精确匹配
+        temp_dir = self.subtitle_temp_dir
+        logger.info(f"[LLMSeg] start. subtitle_only_mode={self.subtitle_only_mode}, temp_dir={temp_dir}, exists={temp_dir.exists()}")
+        if not temp_dir.exists():
+            logger.warning(f"Subtitle temp dir does not exist: {temp_dir}")
+            if self.subtitle_only_mode:
+                self.status_signal.emit(_("subtitle_only.no_json3"))
+            return
+
+        # 收集需要处理的 json3 文件（temp dir 隔离后是干净的，直接 glob 全部）
+        json3_files = sorted(temp_dir.glob('*.json3'))
+        logger.info(f"[LLMSeg] json3_files found: {[str(p) for p in json3_files]}")
+        if not json3_files:
+            logger.info("No json3 subtitle file found for LLM segmentation")
+            if self.subtitle_only_mode:
+                self.status_signal.emit(_("subtitle_only.no_json3"))
+            return
+
+        # 仅字幕模式下的处理中提示
+        if self.subtitle_only_mode:
+            self.status_signal.emit(_("subtitle_only.segmenting"))
+
+        # 处理每一个 json3 文件
+        last_srt_path: Optional[Path] = None
+        for idx, json3_path in enumerate(json3_files, 1):
+            # 从文件名中尝试推断语言代码（如 title.en.json3 -> en），失败则用 subtitle_langs[0]
+            lang = 'en'
+            stem = json3_path.stem  # e.g. "title.en"
+            parts = stem.split('.')
+            if len(parts) >= 2 and len(parts[-1]) <= 8:
+                lang = parts[-1]
+            elif self.subtitle_langs:
+                try:
+                    lang = self.subtitle_langs[0].split(" - ")[0]
+                except Exception:
+                    pass
+
+            # SRT 输出到用户下载目录（self.path），而不是 temp dir
+            # 仅字幕模式输出 .srt；普通模式输出 .llm.srt
+            if self.subtitle_only_mode:
+                # title.en.json3 -> title.en.srt
+                srt_filename = f"{stem}.srt"
+            else:
+                srt_filename = f"{stem}.llm.srt"
+            srt_path = self.path / srt_filename
+
+            logger.info(f"[{idx}/{len(json3_files)}] Segmenting: {json3_path} -> {srt_path}")
+            if len(json3_files) > 1:
+                self.status_signal.emit(f"[{idx}/{len(json3_files)}] {_('subtitle_only.segmenting')}")
+
+            try:
+                segment_with_llm(
+                    json3_path=json3_path,
+                    output_srt_path=srt_path,
+                    lang=lang,
+                    llm_config=self.llm_config,
+                )
+                last_srt_path = srt_path
+                logger.info(f"Segmentation complete: {srt_path}")
+            except Exception as e:
+                logger.exception(f"Segmentation failed for {json3_path}: {e}")
+                if self.subtitle_only_mode:
+                    self.status_signal.emit(_("subtitle_only.segment_failed", error=str(e)))
+                # 继续处理下一个文件
+                continue
+
+        # 完成提示
+        if self.subtitle_only_mode and last_srt_path is not None:
+            self.status_signal.emit(_("subtitle_only.complete", path=str(last_srt_path)))
+            # 让“打开文件夹”按钮能定位到最后生成的 SRT
+            self.last_file_path = str(last_srt_path)
+            self.current_filename = last_srt_path.name
+        elif not self.subtitle_only_mode:
+            self.status_signal.emit(_("llm.complete"))
+
+    def cleanup_subtitle_temp_dir(self) -> None:
+        """清理字幕临时目录。
+
+        断句完成后调用，删除整个临时目录树（含 json3 文件）。
+        SRT 文件已经输出到 self.path，temp dir 可以安全删除。
+        """
+        try:
+            if self.subtitle_temp_dir.exists():
+                shutil.rmtree(self.subtitle_temp_dir, ignore_errors=True)
+                logger.info(f"[Download] cleaned subtitle temp dir: {self.subtitle_temp_dir}")
+        except Exception as e:
+            logger.warning(f"Failed to clean subtitle temp dir: {e}")
 
     def pause(self) -> None:
         self.paused = True

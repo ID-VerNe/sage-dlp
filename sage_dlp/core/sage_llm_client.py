@@ -62,6 +62,7 @@ class LLMClient:
             return url
         return f"{url.rstrip('/')}/v1/chat/completions"
 
+    # @lat: [[Core#sage_llm_client]]
     def chat_text(self, prompt: str, system_prompt: Optional[str] = None, timeout: Optional[int] = None, max_retries: Optional[int] = None) -> str:
         cache_key = (system_prompt or "", prompt, False, self.model)
         cached = self._cache.get(cache_key)

@@ -119,6 +119,7 @@ class LLMSegmenter:
             return True
         return False
 
+    # @lat: [[Core#sage_logic_llm]]
     def process(self, flat_words):
         # Step 1: 物理断句 (.?!)
         blocks = self._split_by_terminal_punct(flat_words)

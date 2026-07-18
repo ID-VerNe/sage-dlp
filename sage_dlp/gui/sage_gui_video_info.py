@@ -283,40 +283,50 @@ class VideoInfoMixin:
 
             # Enable/disable the merge checkbox in the parent window
             if merge_checkbox:
-                # Only enable merge checkbox if we're not in Audio Only mode and analysis is complete
+                # Only enable merge checkbox if we're not in Audio Only / Subtitle-only mode and analysis is complete
                 is_audio_only = hasattr(self, "audio_button") and self.audio_button.isChecked()
+                is_subtitle_only = hasattr(self, "subtitle_only_button") and self.subtitle_only_button.isChecked()
                 has_analysis = getattr(self, "analysis_completed", False)
-                # In audio-only mode, we still allow subtitle selection but not merging
-                should_enable = count > 0 and not is_audio_only and has_analysis
+                # In audio-only / subtitle-only mode, we still allow subtitle selection but not merging
+                should_enable = count > 0 and not is_audio_only and not is_subtitle_only and has_analysis
                 merge_checkbox.setEnabled(should_enable)
                 # Update tooltip
                 if not has_analysis:
                     merge_checkbox.setToolTip(_("main_ui.analyze_first_tooltip"))
                 elif is_audio_only:
                     merge_checkbox.setToolTip(_("main_ui.audio_mode_disabled"))
+                elif is_subtitle_only:
+                    merge_checkbox.setToolTip(_("main_ui.subtitle_only_mode"))
                 elif count == 0:
                     merge_checkbox.setToolTip(_("main_ui.select_subtitles_first"))
                 else:
                     merge_checkbox.setToolTip("")
 
-            # Enable LLM segment checkbox when subtitles are selected (Video mode only)
+            # LLM 复选框：选了字幕后可用，用于切换 LLM 模式 / rule 模式
+            # 断句 pipeline 本身是无条件启用的（选了字幕就跑），复选框只控制模式
             llm_checkbox = getattr(self, "llm_segment_checkbox", None)
             if llm_checkbox:
                 is_audio_only = hasattr(self, "audio_button") and self.audio_button.isChecked()
+                is_subtitle_only = hasattr(self, "subtitle_only_button") and self.subtitle_only_button.isChecked()
                 has_analysis = getattr(self, "analysis_completed", False)
-                should_enable_llm = count > 0 and not is_audio_only and has_analysis
-                llm_checkbox.setEnabled(should_enable_llm)
-                if not has_analysis:
-                    llm_checkbox.setToolTip(_("main_ui.analyze_first_tooltip"))
-                elif is_audio_only:
-                    llm_checkbox.setToolTip(_("main_ui.audio_mode_disabled"))
-                elif count == 0:
-                    llm_checkbox.setToolTip("")
-                else:
-                    llm_checkbox.setToolTip(_("llm.checkbox_tooltip"))
-                # Auto-check if subtitles are selected and analysis is complete
-                if should_enable_llm:
+                # 仅字幕模式下 LLM 模式强制启用（因为 rule 模式质量较低）
+                if is_subtitle_only:
+                    llm_checkbox.setEnabled(False)
                     llm_checkbox.setChecked(True)
+                    llm_checkbox.setToolTip(_("main_ui.subtitle_only_llm_auto_enabled"))
+                else:
+                    # 选了字幕 + 分析完成 → 复选框可用（用户可选 LLM 或 rule 模式）
+                    should_enable_llm = count > 0 and not is_audio_only and has_analysis
+                    llm_checkbox.setEnabled(should_enable_llm)
+                    if not has_analysis:
+                        llm_checkbox.setToolTip(_("main_ui.analyze_first_tooltip"))
+                    elif is_audio_only:
+                        llm_checkbox.setToolTip(_("main_ui.audio_mode_disabled"))
+                    elif count == 0:
+                        llm_checkbox.setToolTip("")
+                    else:
+                        llm_checkbox.setToolTip(_("llm.checkbox_tooltip"))
+                    # 不再自动勾选 —— 默认用 rule 模式，用户按需勾选 LLM 模式
 
             # Re-apply stylesheet to update button border if property changed
             self.subtitle_select_btn.style().unpolish(self.subtitle_select_btn)

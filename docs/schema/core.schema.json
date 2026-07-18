@@ -1,0 +1,65 @@
+{
+  "module": "core",
+  "version": "5.2.0",
+  "exports": {
+    "sage_downloader": [
+      { "name": "SignalManager", "kind": "class", "bases": ["QObject"], "signals": ["update_formats", "update_status", "update_progress", "playlist_info_label_visible", "playlist_info_label_text", "selected_subs_label_text", "playlist_select_btn_visible", "playlist_select_btn_text", "llm_complete"] },
+      { "name": "DownloadThread", "kind": "class", "bases": ["QThread"], "signals": ["progress_signal", "status_signal", "finished_signal", "error_signal", "file_exists_signal", "update_details"] }
+    ],
+    "sage_subtitle_processor": [
+      { "name": "SubtitlesProcessor", "kind": "class", "params": ["segments", "lang", "mode", "llm_config", "callback_progress", "max_lines"] },
+      { "name": "save_srt", "kind": "function", "params": ["subtitles", "filename"], "returns": "None" }
+    ],
+    "sage_json3_parser": [
+      { "name": "parse_yt_json3_to_flat_words", "kind": "function", "params": ["json3_data"], "returns": "List[Dict]" },
+      { "name": "load_json3", "kind": "function", "params": ["path"], "returns": "dict" }
+    ],
+    "sage_logic_rule": [
+      { "name": "RuleSegmenter", "kind": "class", "params": ["processor"], "methods": ["process", "_group_into_natural_units", "_recursive_split_to_events"] }
+    ],
+    "sage_logic_llm": [
+      { "name": "LLMSegmenter", "kind": "class", "params": ["processor"], "methods": ["process", "_recursive_split_logic", "_get_single_cut_llm", "_semantic_split_fallback"] }
+    ],
+    "sage_llm_client": [
+      { "name": "LLMClient", "kind": "class", "params": ["llm_config"], "methods": ["chat_text", "chat_json"] },
+      { "name": "LRUCache", "kind": "class", "params": ["max_size"] }
+    ],
+    "sage_llm_segmenter": [
+      { "name": "segment_with_llm", "kind": "function", "params": ["json3_path", "output_srt_path", "lang", "llm_config", "progress_callback"], "returns": "List[Dict]" },
+      { "name": "get_json3_path", "kind": "function", "params": ["output_dir", "video_id"], "returns": "Optional[Path]" }
+    ],
+    "sage_grammar_constants": [
+      { "name": "ARTICLES", "kind": "constant", "value": "set[str]" },
+      { "name": "DETERMINERS", "kind": "constant", "value": "set[str]" },
+      { "name": "SUBJECTS", "kind": "constant", "value": "set[str]" },
+      { "name": "AUXILIARIES", "kind": "constant", "value": "set[str]" },
+      { "name": "PREPOSITIONS", "kind": "constant", "value": "set[str]" },
+      { "name": "CONJUNCTIONS", "kind": "constant", "value": "set[str]" },
+      { "name": "NEGATIONS", "kind": "constant", "value": "set[str]" }
+    ],
+    "sage_yt_dlp": [
+      { "name": "check_ytdlp_binary", "kind": "function", "returns": "Optional[Path]" },
+      { "name": "check_ytdlp_installed", "kind": "function", "returns": "bool" },
+      { "name": "get_yt_dlp_path", "kind": "function", "returns": "Path" },
+      { "name": "verify_ytdlp_sha256", "kind": "function", "params": ["file_path", "download_url"], "returns": "bool" },
+      { "name": "DownloadYtdlpThread", "kind": "class", "bases": ["QThread"] }
+    ],
+    "sage_ffmpeg": [
+      { "name": "check_ffmpeg_installed", "kind": "function", "returns": "bool" },
+      { "name": "get_ffmpeg_path", "kind": "function", "returns": "str | Path" },
+      { "name": "auto_install_ffmpeg", "kind": "function", "params": ["progress_callback"], "returns": "bool" }
+    ],
+    "sage_deno": [
+      { "name": "check_deno_binary", "kind": "function", "returns": "Optional[Path]" },
+      { "name": "check_deno_installed", "kind": "function", "returns": "bool" },
+      { "name": "get_deno_version", "kind": "function", "returns": "str" },
+      { "name": "DownloadDenoThread", "kind": "class", "bases": ["QThread"] }
+    ]
+  },
+  "dependencies": {
+    "internal": ["gui", "utils"],
+    "external": ["PySide6", "requests", "packaging"]
+  },
+  "consumers": ["gui", "main"],
+  "entryPoints": ["sage_dlp/core/sage_downloader.py", "sage_dlp/core/sage_subtitle_processor.py", "sage_dlp/core/sage_llm_segmenter.py"]
+}

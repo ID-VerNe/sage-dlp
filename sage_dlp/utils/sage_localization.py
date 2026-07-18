@@ -22,7 +22,7 @@ text = LocalizationManager.get_text("download.ready")
 button_text = LocalizationManager.get_text("buttons.download")
 
 # Change language
-LocalizationManager.set_language("es")
+LocalizationManager.set_language("zh")
 
 # Get available languages
 languages = LocalizationManager.get_available_languages()
@@ -44,7 +44,7 @@ class LocalizationManager:
     """
 
     _lock = threading.RLock()
-    _current_language = "en"
+    _current_language = "zh"
     _languages: Dict[str, Dict[str, Any]] = {}
     _languages_dir = Path(__file__).parent.parent / "languages"
 
@@ -124,19 +124,7 @@ class LocalizationManager:
             "current_language": "Current language: {language}",
             "restart_required": "Language changes will take effect after restarting the application.",
             "english": "English",
-            "spanish": "Español (Spanish)",
-            "portuguese": "Português (Portuguese)",
-            "russian": "Русский (Russian)",
-            "chinese": "中文 (简体) (Chinese Simplified)",
-            "german": "Deutsch (German)",
-            "french": "Français (French)",
-            "hindi": "हिन्दी (Hindi)",
-            "indonesian": "Bahasa Indonesia (Indonesian)",
-            "turkish": "Türkçe (Turkish)",
-            "polish": "Polski (Polish)",
-            "italian": "Italiano (Italian)",
-            "arabic": "العربية (Arabic)",
-            "japanese": "日本語 (Japanese)"
+            "chinese": "中文 (简体) (Chinese Simplified)"
         },
         "download": {
             "preparing": "Preparing your download...",
@@ -300,6 +288,7 @@ class LocalizationManager:
 
         return value
 
+    # @lat: [[Utils#sage_localization]]
     @classmethod
     def get_text(cls, key: str, **kwargs) -> str:
         """
@@ -387,7 +376,7 @@ class LocalizationManager:
         return available_languages
 
     @classmethod
-    def initialize(cls, language_code: str = "en") -> None:
+    def initialize(cls, language_code: str = "zh") -> None:
         """
         Initialize the localization system.
 

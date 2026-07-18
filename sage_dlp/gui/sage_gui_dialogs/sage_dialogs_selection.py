@@ -15,6 +15,7 @@ from PySide6.QtWidgets import (
 )
 
 from ...utils.sage_localization import _
+from ...utils.sage_logger import logger
 from .sage_dialogs_base import (
     ACCENT,
     ACCENT_HOVER,
@@ -46,14 +47,16 @@ class SubtitleSelectionDialog(QDialog):
         # Scroll Area for the list
         scroll_area = QScrollArea()
         scroll_area.setWidgetResizable(True)
-        scroll_area.setStyleSheet("QScrollArea { border: none; }")  # Remove border around scroll area
+        scroll_area.setStyleSheet("QScrollArea { border: none; background-color: #ffffff; }")
         layout.addWidget(scroll_area)
 
         # Container widget for list items (needed for scroll area)
         self.list_container = QWidget()
+        # 显式白底，避免父级 SURFACE 浅灰与文字融合看不见
+        self.list_container.setStyleSheet(f"background-color: #ffffff;")
         self.list_layout = QVBoxLayout(self.list_container)
-        self.list_layout.setContentsMargins(0, 0, 0, 0)
-        self.list_layout.setSpacing(2)  # Compact spacing
+        self.list_layout.setContentsMargins(8, 8, 8, 8)
+        self.list_layout.setSpacing(4)  # 行距适当加大
         self.list_layout.setAlignment(Qt.AlignmentFlag.AlignTop)  # Align items to top
         scroll_area.setWidget(self.list_container)
 
@@ -86,9 +89,13 @@ class SubtitleSelectionDialog(QDialog):
             if widget is not None:
                 widget.deleteLater()
 
-        # Only show en and zh-hans subtitles
+        # 只筛选出中英字幕（同语言手动优先于自动，去重）
         target_langs = {"en", "zh-hans", "zh"}
         combined_subs = {}
+
+        logger.info(f"[SubDialog] available_manual keys={list(self.available_manual.keys())}")
+        logger.info(f"[SubDialog] available_auto keys={list(self.available_auto.keys())}")
+        logger.info(f"[SubDialog] previously_selected={self.previously_selected}")
 
         # Add manual subs
         for lang_code, sub_info in self.available_manual.items():
@@ -100,11 +107,21 @@ class SubtitleSelectionDialog(QDialog):
             if lang_code.lower() in target_langs and lang_code not in combined_subs:
                 combined_subs[lang_code] = f"{lang_code} - Auto-generated"
 
+        logger.info(f"[SubDialog] combined_subs={combined_subs}")
+
         if not combined_subs:
             no_subs_label = QLabel(_("dialogs.no_subtitles_available"))
             no_subs_label.setStyleSheet(f"color: {TEXT_MUTED}; padding: 10px;")
             self.list_layout.addWidget(no_subs_label)
             return
+
+        # 首次打开（无历史选择）时默认选中英文字幕：
+        # 优先 "en - Manual"，其次 "en - Auto-generated"
+        if not self.previously_selected:
+            en_item = combined_subs.get("en")
+            if en_item:
+                self.previously_selected.add(en_item)
+                logger.info(f"[SubDialog] default-selected en subtitle: {en_item}")
 
         # Sort by language code
         sorted_lang_codes = sorted(combined_subs.keys())
@@ -115,7 +132,34 @@ class SubtitleSelectionDialog(QDialog):
             checkbox.setProperty("subtitle_id", item_text)
             checkbox.setChecked(item_text in self.previously_selected)
             checkbox.stateChanged.connect(self.update_selection)
-            checkbox.setStyleSheet(checkbox_qss(square=True))
+            # 显式白底 + 深色文字 + 大号字体，确保在浅色背景上清晰可见
+            checkbox.setStyleSheet(f"""
+                QCheckBox {{
+                    color: {TEXT_PRIMARY};
+                    spacing: 8px;
+                    padding: 6px 4px;
+                    background-color: #ffffff;
+                    font-size: 14px;
+                }}
+                QCheckBox::indicator {{
+                    width: 20px;
+                    height: 20px;
+                    border-radius: 4px;
+                    border: 2px solid {BORDER};
+                    background: #ffffff;
+                }}
+                QCheckBox::indicator:unchecked {{
+                    border: 2px solid #94a3b8;
+                    background: #ffffff;
+                }}
+                QCheckBox::indicator:checked {{
+                    border: 2px solid {ACCENT};
+                    background: {ACCENT};
+                }}
+                QCheckBox:hover {{
+                    background-color: #f1f5f9;
+                }}
+            """)
             self.list_layout.addWidget(checkbox)
 
         self.list_layout.addStretch()

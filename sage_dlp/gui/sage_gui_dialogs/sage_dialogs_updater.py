@@ -29,6 +29,7 @@ from ...core.sage_utils import (
     update_auto_update_settings,
 )
 from ...core.sage_yt_dlp import get_yt_dlp_path
+from ...core.sage_deno import check_deno_binary, get_deno_version, DownloadDenoThread
 from .sage_dialogs_update import YTDLPUpdateDialog
 from ...utils.sage_config_manager import ConfigManager
 from ...utils.sage_localization import _
@@ -183,7 +184,10 @@ class FFmpegCheckThread(QThread):
 
 class UpdaterTabWidget(QWidget):
     """Widget for the Updater tab in Custom Options dialog."""
-    
+
+    # Signal for thread-safe UI updates from channel switch
+    _channel_switch_result = Signal(str, bool)  # message, success
+
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
         self._parent: "CustomOptionsDialog" = cast("CustomOptionsDialog", self.parent())
@@ -295,8 +299,49 @@ class UpdaterTabWidget(QWidget):
         ffmpeg_layout.addWidget(guide_label)
         
         layout.addWidget(ffmpeg_group)
-        
-        
+
+        # === Deno Runtime Section ===
+        deno_group = QGroupBox(_('ffmpeg_updater.deno_title'))
+        deno_layout = QVBoxLayout(deno_group)
+
+        # Version info
+        deno_version_layout = QVBoxLayout()
+
+        # Current version
+        deno_current_layout = QHBoxLayout()
+        deno_current_label = QLabel(_('ffmpeg_updater.deno_current_version'))
+        deno_current_label.setStyleSheet("font-weight: bold; color: #0f172a;")
+        deno_current_layout.addWidget(deno_current_label)
+
+        self.deno_current_version_label = QLabel("...")
+        self.deno_current_version_label.setStyleSheet("color: #64748b;")
+        deno_current_layout.addWidget(self.deno_current_version_label)
+        deno_current_layout.addStretch()
+        deno_version_layout.addLayout(deno_current_layout)
+
+        deno_layout.addLayout(deno_version_layout)
+
+        # Deno status label
+        self.deno_status_label = QLabel(_('ffmpeg_updater.status_idle'))
+        self.deno_status_label.setWordWrap(True)
+        self.deno_status_label.setStyleSheet(
+            "color: #64748b; font-size: 12px; padding: 8px; "
+            "background-color: #eff4fa; border-radius: 8px; margin: 5px 0;"
+        )
+        deno_layout.addWidget(self.deno_status_label)
+
+        # Download button
+        deno_button_layout = QHBoxLayout()
+        self.deno_install_button = QPushButton(_('ffmpeg_updater.deno_install'))
+        self.deno_install_button.clicked.connect(self._install_deno)
+        self.deno_install_button.setStyleSheet(primary_button_qss(min_width="120px"))
+        deno_button_layout.addWidget(self.deno_install_button)
+        deno_button_layout.addStretch()
+        deno_layout.addLayout(deno_button_layout)
+
+        layout.addWidget(deno_group)
+
+
         # === App Updates Section ===
         app_update_group = QGroupBox(_("settings.app_updates_title"))
         app_update_layout = QVBoxLayout()
@@ -390,7 +435,13 @@ class UpdaterTabWidget(QWidget):
         layout.addWidget(auto_update_group_box)
         
         layout.addStretch()
-        
+
+        # Start deno status refresh
+        self._refresh_deno_status()
+
+        # Connect channel switch signal to main-thread handler
+        self._channel_switch_result.connect(self._on_channel_switch_result)
+
         # Set the content widget to the scroll area
         scroll_area.setWidget(content_widget)
         
@@ -492,12 +543,12 @@ class UpdaterTabWidget(QWidget):
             try:
                 # Get yt-dlp path
                 yt_dlp_path = get_yt_dlp_path()
-                
+
                 # Build the update command
                 # When switching to stable from nightly, we need to get the latest stable version
                 # to force the switch even if versions have the same date
                 update_target = new_channel
-                
+
                 if new_channel == "stable" and current_channel == "nightly":
                     # Get the latest stable version tag from PyPI (no rate limiting)
                     logger.info("Fetching latest stable version tag from PyPI...")
@@ -518,7 +569,7 @@ class UpdaterTabWidget(QWidget):
                             logger.warning("Could not determine latest stable tag, using 'stable'")
                     except Exception as e:
                         logger.warning(f"Failed to fetch latest stable tag, using 'stable': {e}")
-                
+
                 # Run the update-to command
                 logger.info(f"Switching yt-dlp to {new_channel} channel...")
                 logger.debug(f"Running command: {yt_dlp_path} --update-to {update_target}")
@@ -529,26 +580,25 @@ class UpdaterTabWidget(QWidget):
                     timeout=120,
                     creationflags=SUBPROCESS_CREATIONFLAGS,
                 )
-                
+
                 # Log the output for debugging
                 if result.stdout:
                     logger.debug(f"yt-dlp stdout: {result.stdout.strip()}")
                 if result.stderr:
                     logger.debug(f"yt-dlp stderr: {result.stderr.strip()}")
                 logger.debug(f"yt-dlp return code: {result.returncode}")
-                
+
                 if result.returncode == 0:
                     # Success - save the preference
                     ConfigManager.set("ytdlp_channel", new_channel)
                     logger.info(f"Successfully switched to {new_channel} channel")
-                    
-                    # Update UI
-                    self.channel_status_label.setText(_("settings.ytdlp_channel_switched", channel=new_channel))
-                    self.channel_status_label.setStyleSheet(
-                        "color: #00cc00; font-size: 11px; padding: 5px; "
-                        "background-color: #eff4fa; border-radius: 8px; margin: 5px 0;"
+
+                    # Emit signal instead of direct UI calls
+                    self._channel_switch_result.emit(
+                        _("settings.ytdlp_channel_switched", channel=new_channel),
+                        True
                     )
-                    
+
                     # Make executable on Unix systems
                     if OS_NAME != "Windows":
                         import os
@@ -557,48 +607,43 @@ class UpdaterTabWidget(QWidget):
                     # Failed - revert radio button
                     error_msg = result.stderr.strip() if result.stderr else result.stdout.strip() if result.stdout else "Unknown error"
                     logger.error(f"Failed to switch channel: {error_msg}")
-                    
-                    self.channel_status_label.setText(_("settings.ytdlp_channel_switch_failed", error=error_msg))
-                    self.channel_status_label.setStyleSheet(
-                        "color: #ff6666; font-size: 11px; padding: 5px; "
-                        "background-color: #eff4fa; border-radius: 8px; margin: 5px 0;"
+
+                    self._channel_switch_result.emit(
+                        _("settings.ytdlp_channel_switch_failed", error=error_msg),
+                        False
                     )
-                    
-                    # Revert radio selection
+                    # Need to revert radio on main thread
                     if current_channel == "nightly":
-                        self.channel_nightly_radio.setChecked(True)
+                        self._channel_switch_result.emit("revert_nightly", False)
                     else:
-                        self.channel_stable_radio.setChecked(True)
-                        
+                        self._channel_switch_result.emit("revert_stable", False)
+
             except subprocess.TimeoutExpired:
                 logger.error("Channel switch timed out")
-                self.channel_status_label.setText(_("settings.ytdlp_channel_switch_failed", error="Timeout"))
-                self.channel_status_label.setStyleSheet(
-                    "color: #ff6666; font-size: 11px; padding: 5px; "
-                    "background-color: #eff4fa; border-radius: 8px; margin: 5px 0;"
+                self._channel_switch_result.emit(
+                    _("settings.ytdlp_channel_switch_failed", error="Timeout"),
+                    False
                 )
                 # Revert radio selection
                 if current_channel == "nightly":
-                    self.channel_nightly_radio.setChecked(True)
+                    self._channel_switch_result.emit("revert_nightly", False)
                 else:
-                    self.channel_stable_radio.setChecked(True)
-                    
+                    self._channel_switch_result.emit("revert_stable", False)
+
             except Exception as e:
                 logger.exception(f"Error switching channel: {e}")
-                self.channel_status_label.setText(_("settings.ytdlp_channel_switch_failed", error=str(e)))
-                self.channel_status_label.setStyleSheet(
-                    "color: #ff6666; font-size: 11px; padding: 5px; "
-                    "background-color: #eff4fa; border-radius: 8px; margin: 5px 0;"
+                self._channel_switch_result.emit(
+                    _("settings.ytdlp_channel_switch_failed", error=str(e)),
+                    False
                 )
                 # Revert radio selection
                 if current_channel == "nightly":
-                    self.channel_nightly_radio.setChecked(True)
+                    self._channel_switch_result.emit("revert_nightly", False)
                 else:
-                    self.channel_stable_radio.setChecked(True)
+                    self._channel_switch_result.emit("revert_stable", False)
             finally:
-                # Re-enable radio buttons
-                self.channel_stable_radio.setEnabled(True)
-                self.channel_nightly_radio.setEnabled(True)
+                # Re-enable radio buttons on main thread
+                self._channel_switch_result.emit("re_enable", False)
         
         # Start the thread
         thread = threading.Thread(target=switch_channel, daemon=True)
@@ -612,6 +657,29 @@ class UpdaterTabWidget(QWidget):
             "background-color: #eff4fa; border-radius: 8px; margin: 5px 0;"
         )
         self.channel_status_label.setVisible(True)
+
+    def _on_channel_switch_result(self, message: str, success: bool) -> None:
+        """Handle channel switch result on main thread."""
+        if message == "revert_nightly":
+            self.channel_nightly_radio.setChecked(True)
+        elif message == "revert_stable":
+            self.channel_stable_radio.setChecked(True)
+        elif message == "re_enable":
+            self.channel_stable_radio.setEnabled(True)
+            self.channel_nightly_radio.setEnabled(True)
+        else:
+            self.channel_status_label.setText(message)
+            if success:
+                self.channel_status_label.setStyleSheet(
+                    "color: #00cc00; font-size: 11px; padding: 5px; "
+                    "background-color: #eff4fa; border-radius: 8px; margin: 5px 0;"
+                )
+            else:
+                self.channel_status_label.setStyleSheet(
+                    "color: #ff6666; font-size: 11px; padding: 5px; "
+                    "background-color: #eff4fa; border-radius: 8px; margin: 5px 0;"
+                )
+            self.channel_status_label.setVisible(True)
     
     def test_update_check(self) -> None:
         """Open the yt-dlp update dialog with proper progress tracking."""
@@ -619,6 +687,71 @@ class UpdaterTabWidget(QWidget):
         dialog = YTDLPUpdateDialog(self)
         dialog.setModal(False)  # Make it non-modal
         dialog.show()  # Use show() instead of exec() to avoid blocking
+
+    def _refresh_deno_status(self) -> None:
+        """Check deno installation status and update UI."""
+        deno_path = check_deno_binary()
+        if deno_path:
+            version = get_deno_version()
+            self.deno_current_version_label.setText(version)
+            self.deno_install_button.setText(_('ffmpeg_updater.deno_reinstall'))
+            self.deno_status_label.setText(_('ffmpeg_updater.deno_installed'))
+            self.deno_status_label.setStyleSheet(
+                "color: #00cc00; font-size: 12px; padding: 8px; "
+                "background-color: #eff4fa; border-radius: 8px; margin: 5px 0;"
+            )
+        else:
+            self.deno_current_version_label.setText(_('ffmpeg_updater.status_not_installed'))
+            self.deno_install_button.setText(_('ffmpeg_updater.deno_install'))
+            self.deno_status_label.setText(_('ffmpeg_updater.deno_not_installed'))
+            self.deno_status_label.setStyleSheet(
+                "color: #ff6666; font-size: 12px; padding: 8px; "
+                "background-color: #eff4fa; border-radius: 8px; margin: 5px 0;"
+            )
+
+    def _install_deno(self) -> None:
+        """Install or reinstall deno in background."""
+        # Prevent concurrent installs
+        if hasattr(self, "_deno_download_thread") and self._deno_download_thread is not None and self._deno_download_thread.isRunning():
+            return
+
+        self.deno_install_button.setEnabled(False)
+        self.deno_install_button.setText(_('ffmpeg_updater.deno_installing'))
+        self.deno_status_label.setText(_('ffmpeg_updater.status_checking'))
+        self.deno_status_label.setStyleSheet(
+            "color: #ffaa00; font-size: 12px; padding: 8px; "
+            "background-color: #eff4fa; border-radius: 8px; margin: 5px 0;"
+        )
+
+        # Disconnect old signals first to prevent duplicate connections
+        if hasattr(self, "_deno_download_thread") and self._deno_download_thread is not None:
+            try:
+                self._deno_download_thread.progress_signal.disconnect()
+            except (TypeError, RuntimeError):
+                pass
+            try:
+                self._deno_download_thread.finished_signal.disconnect()
+            except (TypeError, RuntimeError):
+                pass
+
+        self._deno_download_thread = DownloadDenoThread()
+        self._deno_download_thread.progress_signal.connect(self._on_deno_progress)
+        self._deno_download_thread.finished_signal.connect(self._on_deno_finished)
+        self._deno_download_thread.start()
+
+    def _on_deno_progress(self, percent: int) -> None:
+        self.deno_status_label.setText(_('ffmpeg_updater.deno_downloading', percent=percent))
+
+    def _on_deno_finished(self, success: bool, message: str) -> None:
+        self.deno_install_button.setEnabled(True)
+        if success:
+            self._refresh_deno_status()
+        else:
+            self.deno_status_label.setText(_('ffmpeg_updater.deno_download_failed', error=message))
+            self.deno_status_label.setStyleSheet(
+                "color: #ff6666; font-size: 12px; padding: 8px; "
+                "background-color: #eff4fa; border-radius: 8px; margin: 5px 0;"
+            )
     
     def check_for_updates(self) -> None:
         """Check FFmpeg version and compare with latest."""

@@ -6,7 +6,7 @@ This package contains all dialog classes organized by functionality:
     - sage_dialogs_base: Base utility dialogs
     - sage_dialogs_settings: Settings configuration dialogs
     - sage_dialogs_update: Update-related dialogs and threads
-    - sage_dialogs_ffmpeg: FFmpeg installation dialogs
+    - sage_dialogs_ffmpeg: FFmpeg installation thread
     - sage_dialogs_selection: Subtitle and playlist selection dialogs
     - sage_dialogs_custom: Custom functionality dialogs
 """
@@ -14,7 +14,7 @@ This package contains all dialog classes organized by functionality:
 # Re-export all dialog classes for backward compatibility
 from .sage_dialogs_base import LogWindow
 from .sage_dialogs_custom import CustomOptionsDialog
-from .sage_dialogs_ffmpeg import FFmpegCheckDialog, FFmpegInstallThread
+from .sage_dialogs_ffmpeg import FFmpegInstallThread
 from .sage_dialogs_selection import (
     PlaylistSelectionDialog,
     SubtitleSelectionDialog,
@@ -39,7 +39,6 @@ __all__ = [
 
     # FFmpeg dialogs
     "FFmpegInstallThread",
-    "FFmpegCheckDialog",
 
     # Selection dialogs
     "SubtitleSelectionDialog",

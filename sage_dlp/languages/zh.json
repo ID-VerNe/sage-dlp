@@ -5,19 +5,7 @@
     "current_language": "当前语言：{language}",
     "restart_required": "语言更改将在重启应用程序后生效。",
     "english": "英语",
-    "spanish": "西班牙语",
-    "portuguese": "葡萄牙语",
-    "russian": "俄语",
     "chinese": "中文",
-    "german": "德语",
-    "french": "法语",
-    "hindi": "印地语",
-    "indonesian": "印尼语",
-    "turkish": "土耳其语",
-    "polish": "波兰语",
-    "italian": "意大利语",
-    "arabic": "阿拉伯语",
-    "japanese": "日语",
     "help_text": "选择您喜欢的界面语言。",
     "restart_notice": "语言更改将在重启应用程序后生效。"
   },
@@ -47,6 +35,7 @@
     "select_videos": "选择视频",
     "video": "视频",
     "audio_only": "仅音频",
+    "subtitle_only": "仅字幕",
     "trim_video": "裁剪视频",
     "download_settings": "下载设置",
     "change_path": "更改路径",
@@ -80,6 +69,10 @@
     "embed_chapters": "嵌入章节",
     "analyze_first_tooltip": "请先分析视频",
     "audio_mode_disabled": "音频模式下不可用",
+    "subtitle_only_mode": "仅字幕模式",
+    "subtitle_only_tooltip": "只下载带单词级时间戳的字幕（json3），调用断句方案生成精确断句的 SRT",
+    "subtitle_only_require_subs": "仅字幕模式需要先选择至少一个字幕语言",
+    "subtitle_only_llm_auto_enabled": "仅字幕模式已自动启用智能断句",
     "select_subtitles": "选择字幕",
     "sponsorblock_categories": "SponsorBlock 分类",
     "select_subtitles_first": "请先选择字幕",
@@ -303,7 +296,9 @@
     "analysis_failed": "错误：分析失败：{error}",
     "analysis_timeout": "错误：分析超时，请重试。",
     "generic_error": "错误：{error}",
-    "playlist_no_url": "错误：无法获取播放列表中第一个视频的链接。"
+    "playlist_no_url": "错误：无法获取播放列表中第一个视频的链接。",
+    "deno_not_found": "未找到 JavaScript 运行时 (deno)。使用 Cookie 时 yt-dlp 需要 deno 来解决 YouTube 挑战。应用将尝试自动安装。",
+    "js_runtime_missing": "⚠️ 缺少 JavaScript 运行时。YouTube Cookie 认证需要 Deno 才能正常工作。"
   },
   "status": {
     "ready": "就绪",
@@ -569,9 +564,16 @@
     "target_cps": "目标 CPS：",
     "limit_cps": "CPS 上限：",
     "checkbox": "LLM 智能断句",
-    "checkbox_tooltip": "启用 LLM 驱动的字幕智能断句（需先配置 LLM 设置）",
+    "checkbox_tooltip": "勾选后使用 LLM 智能断句（需配置 LLM 服务）；不勾选则用纯规则断句。选了字幕即自动生成精确断句 SRT",
     "in_progress": "LLM 断句处理中...",
     "complete": "LLM 断句完成"
+  },
+  "subtitle_only": {
+    "downloading": "正在下载带单词级时间戳的字幕...",
+    "segmenting": "正在调用断句方案生成精确 SRT...",
+    "complete": "精确断句 SRT 已生成：{path}",
+    "no_json3": "未找到 json3 字幕文件，无法生成 SRT",
+    "segment_failed": "断句失败：{error}"
   },
   "file_exists_dialog": {
     "title": "文件已存在",
@@ -649,7 +651,16 @@
     "check_updates": "检查更新",
     "check_failed": "检查更新失败",
     "description": "管理和更新 FFmpeg。FFmpeg 用于视频合并与字幕嵌入。",
-    "guide_info": "查看 FFmpeg 安装指南"
+    "guide_info": "查看 FFmpeg 安装指南",
+    "deno_title": "Deno 运行时",
+    "deno_current_version": "当前版本：",
+    "deno_install": "安装 Deno",
+    "deno_reinstall": "重新安装 Deno",
+    "deno_installing": "正在安装...",
+    "deno_installed": "✅ Deno 已安装",
+    "deno_not_installed": "❌ Deno 未安装。使用 Cookie 时 yt-dlp 需要 Deno 来解决 YouTube 挑战。",
+    "deno_downloading": "正在下载 Deno... {percent}%",
+    "deno_download_failed": "下载失败: {error}"
   },
   "subtitle_selection": {
     "count_selected": "已选择 {count} 个字幕"

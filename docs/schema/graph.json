@@ -1,0 +1,19 @@
+{
+  "modules": [
+    { "name": "core", "dependsOn": [], "usedBy": ["gui", "main"] },
+    { "name": "gui", "dependsOn": ["core", "utils"], "usedBy": ["main"] },
+    { "name": "utils", "dependsOn": [], "usedBy": ["core", "gui", "main"] },
+    { "name": "dialogs", "dependsOn": ["gui", "utils"], "usedBy": ["gui"] },
+    { "name": "browser_ext", "dependsOn": [], "usedBy": [] },
+    { "name": "languages", "dependsOn": [], "usedBy": ["utils"] }
+  ],
+  "entryPoints": ["sage_dlp/main.py"],
+  "techStack": {
+    "language": "Python",
+    "runtime": ">=3.10,<3.15",
+    "gui": "PySide6 >=6.10.1",
+    "build": "setuptools",
+    "dependencies": ["PySide6", "requests", "pillow", "packaging", "markdown", "loguru"],
+    "externalBinaries": ["yt-dlp", "ffmpeg", "deno"]
+  }
+}

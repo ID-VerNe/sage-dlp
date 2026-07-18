@@ -268,7 +268,7 @@ class CustomOptionsDialog(QDialog):
         language_layout.addWidget(language_help_text)
 
         # Current language info
-        current_lang = ConfigManager.get("language") or "en"
+        current_lang = ConfigManager.get("language") or "zh"
         available_languages = LocalizationManager.get_available_languages()
         current_lang_display = available_languages.get(current_lang, current_lang.upper())
         
@@ -786,7 +786,7 @@ class CustomOptionsDialog(QDialog):
         """Handle language selection change"""
         selected_lang_code = self.language_combo.currentData()
         if selected_lang_code:
-            current_lang = ConfigManager.get("language") or "en"
+            current_lang = ConfigManager.get("language") or "zh"
             if selected_lang_code != current_lang:
                 # Save the new language preference
                 ConfigManager.set("language", selected_lang_code)

@@ -276,6 +276,7 @@ class HistoryManager:
             logger.error(f"Error fetching entry {entry_id}: {e}")
             return None
 
+    # @lat: [[Utils#sage_history_manager]]
     @classmethod
     def add_entry(
         cls,

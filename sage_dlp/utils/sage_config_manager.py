@@ -88,7 +88,7 @@ class ConfigManager:
         "check_beta_updates": False,
         "last_update_check": 0,
         "concurrent_fragments": 1,
-        "language": "en",
+        "language": "zh",
         "ytdlp_channel": "stable",
         "force_output_format": False,
         "preferred_output_format": "mp4",
@@ -158,6 +158,7 @@ class ConfigManager:
             except Exception as e:
                 logger.exception(f"Unexpected error while saving config: {e}")
 
+    # @lat: [[Utils#sage_config_manager]]
     @classmethod
     def get(cls, key: str) -> Optional[Any]:
         """

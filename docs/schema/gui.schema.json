@@ -1,0 +1,39 @@
+{
+  "module": "gui",
+  "version": "5.2.0",
+  "exports": {
+    "sage_gui_main": [
+      { "name": "SageApp", "kind": "class", "bases": ["QMainWindow", "UIMixin", "StartupMixin", "DownloadMixin", "DialogOpsMixin", "WidgetAnimationMixin", "FormatTableMixin", "VideoInfoMixin", "AnalysisMixin"] }
+    ],
+    "sage_gui_ui": [
+      { "name": "UIMixin", "kind": "class", "methods": ["init_ui", "paste_url", "handle_mode_change", "toggle_analysis_dependent_controls"] }
+    ],
+    "sage_gui_startup": [
+      { "name": "StartupMixin", "kind": "class", "methods": ["_perform_startup_checks", "show_update_dialog", "closeEvent"] }
+    ],
+    "sage_gui_download": [
+      { "name": "DownloadMixin", "kind": "class", "methods": ["start_download", "download_finished", "download_error", "update_progress_bar", "toggle_pause", "cancel_download", "open_download_folder"] }
+    ],
+    "sage_gui_analysis": [
+      { "name": "AnalysisMixin", "kind": "class", "methods": ["analyze_url"] }
+    ],
+    "sage_gui_video_info": [
+      { "name": "VideoInfoMixin", "kind": "class", "methods": ["setup_video_info_section", "update_video_info", "open_subtitle_dialog", "download_thumbnail"] }
+    ],
+    "sage_gui_format_table": [
+      { "name": "FormatTableMixin", "kind": "class", "methods": ["setup_format_table", "filter_formats", "update_format_table", "get_selected_format"] }
+    ],
+    "sage_gui_animations": [
+      { "name": "WidgetAnimationMixin", "kind": "class", "methods": ["animate_widget_fade_in", "animate_widget_fade_out", "animate_widget_shake", "set_status_message_animated", "run_dialog_with_blur"] }
+    ],
+    "sage_gui_dialogs_ops": [
+      { "name": "DialogOpsMixin", "kind": "class", "methods": ["show_download_settings_dialog", "show_custom_options", "open_playlist_selection_dialog", "save_playlist_to_file"] }
+    ]
+  },
+  "dependencies": {
+    "internal": ["core", "utils"],
+    "external": ["PySide6", "PySide6.QtMultimedia"]
+  },
+  "consumers": ["main"],
+  "entryPoints": ["sage_dlp/gui/sage_gui_main.py"]
+}

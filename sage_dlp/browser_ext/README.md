@@ -26,6 +26,7 @@ Firefox does not support `fetch()` from service workers to localhost in the same
 
 - `manifest.json` — Renamed to "SageDLP Cookie Bridge", added `http://127.0.0.1:9876/*` to `host_permissions`.
 - `background.mjs` — Added `postCookiesToServer()` that serialises cookies to Netscape format and POSTs them to the local SageDLP server on every badge update.
+- `images/` — Replaced with custom SageDLP brand icons (16/32/48/128).
 - The original download, clipboard, and popup functionality is completely unchanged.
 
 ## Port configuration

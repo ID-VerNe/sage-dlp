@@ -25,6 +25,8 @@ def show_error_dialog(message):
     error_dialog.exec()
 
 
+# @lat: [[Project]]
+
 def main():
     try:
         logger.info("Starting SageDLP application")

@@ -102,6 +102,9 @@ if OS_NAME == "Windows":
     YTDLP_DOWNLOAD_URL: str = "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe"
     YTDLP_APP_BIN_PATH: Path = APP_BIN_DIR / "yt-dlp.exe"
 
+    DENO_DOWNLOAD_URL: str = "https://github.com/denoland/deno/releases/latest/download/deno-x86_64-pc-windows-msvc.zip"
+    DENO_APP_BIN_PATH: Path = APP_BIN_DIR / "deno.exe"
+
     SUBPROCESS_CREATIONFLAGS: int = subprocess.CREATE_NO_WINDOW
 
 elif OS_NAME == "Darwin":  # macOS
@@ -121,6 +124,9 @@ elif OS_NAME == "Darwin":  # macOS
     YTDLP_DOWNLOAD_URL: str = "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_macos"
     YTDLP_APP_BIN_PATH: Path = APP_BIN_DIR / "yt-dlp"
 
+    DENO_DOWNLOAD_URL: str = "https://github.com/denoland/deno/releases/latest/download/deno-x86_64-apple-darwin.zip"
+    DENO_APP_BIN_PATH: Path = APP_BIN_DIR / "deno"
+
     SUBPROCESS_CREATIONFLAGS: int = 0
 
 
@@ -138,13 +144,16 @@ else:  # Linux and other UNIX-like
     APP_THUMBNAILS_DIR: Path = APP_DATA_DIR / "thumbnails"
 
     YTDLP_DOWNLOAD_URL: str = "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp"
-    
+
     # Check for environment variable override (critical for Flatpak support)
     _ytdlp_env_path = os.environ.get("YTDLP_APP_BIN_PATH")
     if _ytdlp_env_path:
         YTDLP_APP_BIN_PATH: Path = Path(_ytdlp_env_path)
     else:
         YTDLP_APP_BIN_PATH: Path = APP_BIN_DIR / "yt-dlp"
+
+    DENO_DOWNLOAD_URL: str = "https://github.com/denoland/deno/releases/latest/download/deno-x86_64-unknown-linux-gnu.zip"
+    DENO_APP_BIN_PATH: Path = APP_BIN_DIR / "deno"
 
     SUBPROCESS_CREATIONFLAGS: int = 0
 
@@ -180,7 +189,7 @@ AUDIO_EXTENSIONS: frozenset[str] = frozenset({
 
 # Subtitle file extensions
 SUBTITLE_EXTENSIONS: frozenset[str] = frozenset({
-    ".vtt", ".srt", ".ass", ".ssa"
+    ".vtt", ".srt", ".ass", ".ssa", ".json3"
 })
 
 # Combined video and audio extensions (for file search operations)

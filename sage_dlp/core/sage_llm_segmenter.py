@@ -13,6 +13,31 @@ from .sage_json3_parser import parse_yt_json3_to_flat_words
 from .sage_subtitle_processor import SubtitlesProcessor, save_srt
 
 
+def _default_llm_config() -> Dict[str, Any]:
+    """返回默认断句配置（不依赖外部 LLM 服务，使用 rule 模式）。
+
+    当用户选了字幕但未显式配置 LLM 断句时，用此配置兜底，
+    确保 pipeline 始终能跑通。
+    """
+    return {
+        "mode": "rule",
+        "url": "",
+        "api_key": "",
+        "model": "gpt-4.1",
+        "temperature": 0.1,
+        "max_workers": 10,
+        "timeout": 60,
+        "max_retries": 3,
+        "segmentation_params": {
+            "SOFT_LIMIT": 70,
+            "HARD_LIMIT": 85,
+            "TARGET_CPS": 14,
+            "LIMIT_CPS": 18,
+        },
+    }
+
+
+# @lat: [[Core#sage_llm_segmenter]]
 def segment_with_llm(
     json3_path: Path,
     output_srt_path: Path,
@@ -68,14 +93,16 @@ def segment_with_llm(
 
 def get_json3_path(output_dir: Path, video_id: str) -> Optional[Path]:
     """Find the json3 subtitle file in the output directory."""
-    # First try: match by video_id
-    json3_files = list(output_dir.glob(f'*{video_id}*.json3'))
-    if json3_files:
-        return json3_files[0]
+    # First try: match by video_id（video_id 为空时直接用 *.json3，避免产生 **.json3 非法 pattern）
+    if video_id:
+        json3_files = list(output_dir.glob(f'*{video_id}*.json3'))
+        if json3_files:
+            # 取最新的（按修改时间）
+            return max(json3_files, key=lambda p: p.stat().st_mtime)
 
-    # Second try: any json3 file
+    # Fallback: any json3 file（取最新的，避免误抓到旧视频的 json3）
     json3_files = list(output_dir.glob('*.json3'))
     if json3_files:
-        return json3_files[0]
+        return max(json3_files, key=lambda p: p.stat().st_mtime)
 
     return None
