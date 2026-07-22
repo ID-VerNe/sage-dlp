@@ -397,7 +397,7 @@ def install_ffmpeg_macos() -> bool:
         except (subprocess.SubprocessError, FileNotFoundError):
             logger.info("Installing Homebrew...")
             brew_install_cmd = '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"'
-            subprocess.run(brew_install_cmd, shell=True, check=True, timeout=300)
+            subprocess.run(['/bin/bash', '-c', 'NONINTERACTIVE=1 bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"'], check=True, timeout=300)
 
         # Install FFmpeg
         logger.info("Installing FFmpeg...")

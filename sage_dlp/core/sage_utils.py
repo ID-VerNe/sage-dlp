@@ -425,7 +425,7 @@ def update_yt_dlp() -> bool:
 
             # Download the latest version
             try:
-                response = requests.get(YTDLP_DOWNLOAD_URL, stream=True)
+                response = requests.get(YTDLP_DOWNLOAD_URL, stream=True, timeout=30)
                 if response.status_code == 200:
                     # Create a temporary file
                     temp_file = f"{yt_dlp_path}.new"
@@ -436,7 +436,7 @@ def update_yt_dlp() -> bool:
 
                     # Make executable on Unix systems
                     if OS_NAME != "Windows":
-                        os.chmod(temp_file, 0o755)
+                        os.chmod(temp_file, 0o700)
 
                     # Replace the old file with the new one
                     try:

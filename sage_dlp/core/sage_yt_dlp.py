@@ -97,7 +97,7 @@ class DownloadYtdlpThread(QThread):
 
             # Download with progress reporting
             logger.info(f"Downloading yt-dlp from: {YTDLP_DOWNLOAD_URL}")
-            response = requests.get(YTDLP_DOWNLOAD_URL, stream=True)
+            response = requests.get(YTDLP_DOWNLOAD_URL, stream=True, timeout=30)
             response.raise_for_status()
             total_size = int(response.headers.get("content-length", 0))
             block_size = 1024  # 1 Kibibyte
@@ -130,7 +130,7 @@ class DownloadYtdlpThread(QThread):
 
             # Make executable on macOS and Linux
             if OS_NAME != "Windows":
-                os.chmod(exe_path, 0o755)
+                os.chmod(exe_path, 0o700)
 
             logger.info("yt-dlp downloaded and verified successfully!")
             self.finished_signal.emit(True, str(exe_path))
@@ -152,7 +152,7 @@ def check_ytdlp_binary() -> Optional[Path]:
         # Make sure it's executable on Unix systems
         if OS_NAME != "Windows" and not os.access(exe_path, os.X_OK):
             try:
-                os.chmod(exe_path, 0o755)
+                os.chmod(exe_path, 0o700)
                 logger.info(f"Fixed permissions on yt-dlp at {exe_path}")
             except Exception as e:
                 logger.exception(f"Could not set executable permissions on {exe_path}: {e}")

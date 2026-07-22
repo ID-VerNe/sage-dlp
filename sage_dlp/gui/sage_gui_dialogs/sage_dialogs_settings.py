@@ -34,6 +34,7 @@ from ...utils.sage_logger import logger
 from ...utils.sage_localization import _
 from ...utils.sage_config_manager import ConfigManager
 from ...utils.sage_constants import APP_LOG_DIR
+from ...core.sage_yt_dlp import get_auto_update_settings, get_ytdlp_version, check_and_update_ytdlp_auto, update_auto_update_settings
 
 from .sage_dialogs_base import (
     ACCENT,

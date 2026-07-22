@@ -140,7 +140,7 @@ class UpdateThread(QThread):
             if result.returncode == 0:
                 # Make executable on Unix systems
                 if OS_NAME != "Windows":
-                    os.chmod(yt_dlp_path, 0o755)
+                    os.chmod(yt_dlp_path, 0o700)
 
                 logger.info("UpdateThread: yt-dlp update completed successfully.")
                 if result.stdout:
@@ -441,7 +441,7 @@ class AutoUpdateThread(QThread):
             if result.returncode == 0:
                 # Make executable on Unix systems
                 if OS_NAME != "Windows":
-                    os.chmod(yt_dlp_path, 0o755)
+                    os.chmod(yt_dlp_path, 0o700)
 
                 logger.info("AutoUpdateThread: yt-dlp update completed successfully.")
                 if result.stdout:

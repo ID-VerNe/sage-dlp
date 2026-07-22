@@ -89,7 +89,7 @@ class LLMClient:
                 last_error = e
                 # Check for rate limit or server error to apply backoff
                 is_rate_limit = False
-                if isinstance(e, urllib.error.HTTPError) and e.code == 429:
+                if isinstance(e, urllib.error.HTTPError) and getattr(e, 'code', 0) == 429:
                     is_rate_limit = True
 
                 if i < retries - 1:
@@ -121,7 +121,7 @@ class LLMClient:
                 last_error = e
                 # Check for rate limit or server error to apply backoff
                 is_rate_limit = False
-                if isinstance(e, urllib.error.HTTPError) and e.code == 429:
+                if isinstance(e, urllib.error.HTTPError) and getattr(e, 'code', 0) == 429:
                     is_rate_limit = True
 
                 if i < retries - 1:
@@ -146,6 +146,8 @@ class LLMClient:
         if force_json:
             body["response_format"] = {"type": "json_object"}
 
+        if not self.url.startswith("http://") and not self.url.startswith("https://"):
+            raise ValueError("Only HTTP/HTTPS URLs are allowed")
         req = urllib.request.Request(
             self.url,
             data=json.dumps(body).encode("utf-8"),

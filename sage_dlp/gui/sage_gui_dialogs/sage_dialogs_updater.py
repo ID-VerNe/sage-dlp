@@ -189,6 +189,7 @@ class UpdaterTabWidget(QWidget):
     _channel_switch_result = Signal(str, bool)  # message, success
 
     def __init__(self, parent=None) -> None:
+        self._deno_download_thread = None
         super().__init__(parent)
         self._parent: "CustomOptionsDialog" = cast("CustomOptionsDialog", self.parent())
         
@@ -602,7 +603,7 @@ class UpdaterTabWidget(QWidget):
                     # Make executable on Unix systems
                     if OS_NAME != "Windows":
                         import os
-                        os.chmod(yt_dlp_path, 0o755)
+                        os.chmod(yt_dlp_path, 0o700)
                 else:
                     # Failed - revert radio button
                     error_msg = result.stderr.strip() if result.stderr else result.stdout.strip() if result.stdout else "Unknown error"

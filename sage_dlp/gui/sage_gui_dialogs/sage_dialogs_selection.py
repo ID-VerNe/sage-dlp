@@ -6,6 +6,9 @@ Contains dialogs for selecting subtitles and playlist videos.
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QCheckBox,
+    QHBoxLayout,
+    QPushButton,
+    QLineEdit,
     QDialog,
     QDialogButtonBox,
     QLabel,
@@ -22,6 +25,7 @@ from .sage_dialogs_base import (
     TEXT_PRIMARY,
     TEXT_MUTED,
     BORDER,
+    SURFACE_DARK,
     checkbox_qss,
     dialog_base_qss,
     secondary_button_qss,

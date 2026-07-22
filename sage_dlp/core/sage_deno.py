@@ -45,7 +45,7 @@ def check_deno_binary() -> Optional[Path]:
         # Ensure executable on Unix
         if OS_NAME != "Windows" and not os.access(exe_path, os.X_OK):
             try:
-                os.chmod(exe_path, 0o755)
+                os.chmod(exe_path, 0o700)
                 logger.info(f"Fixed permissions on deno at {exe_path}")
             except Exception as e:
                 logger.exception(f"Could not set executable permissions on {exe_path}: {e}")
@@ -196,7 +196,7 @@ class DownloadDenoThread(QThread):
 
             # Make executable on Unix
             if OS_NAME != "Windows":
-                os.chmod(exe_path, 0o755)
+                os.chmod(exe_path, 0o700)
 
             logger.info(f"deno downloaded and installed successfully: {exe_path}")
             self.finished_signal.emit(True, str(exe_path))
