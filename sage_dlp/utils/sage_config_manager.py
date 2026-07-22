@@ -70,6 +70,7 @@ class ConfigManager:
     _config_file: Path = APP_CONFIG_FILE
     _settings: Dict[str, Any] = {}
     _default_config: Dict[str, Any] = {
+        "first_run": True,
         "download_path": str(USER_HOME_DIR / "Downloads"),
         "generic_mode": True,
         "speed_limit_value": None,

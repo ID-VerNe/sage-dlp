@@ -96,18 +96,19 @@ def _(key: str, **kwargs) -> str:
 
 ### 职责
 
-轻量级线程化 HTTP 服务器（127.0.0.1:9876），接收浏览器扩展 POST 的 Cookie 数据，保存到时间戳文件并通过 Qt 信号通知 GUI。
+轻量级线程化 HTTP 服务器（127.0.0.1:9876），接收浏览器扩展 POST 的 Cookie 数据，保存到时间戳文件并通过 Qt 信号通知 GUI。**无状态设计**——去重逻辑由扩展端负责，服务端仅做接收→保存→通知。
 
 Reference: [[sage_dlp/utils/sage_cookie_server.py#CookieServer]]
 
 ### 架构
 
 ```
-浏览器扩展 (GET COOKIES) 
-  → POST http://127.0.0.1:9876/api/cookies 
-    → _CookieRequestHandler (BaseHTTPRequestHandler)
-      → _save_cookies() → 保存到 {APP_DATA_DIR}/cookies/cookies_{host}_{timestamp}.txt
-      → CookieServer.cookies_received.emit(file_path, url) → Qt 主线程
+浏览器扩展 (background.mjs)
+  → 300ms 防抖 + 字符串比较去重（扩展端）
+    → POST http://127.0.0.1:9876/api/cookies （仅 cookie 内容变化时）
+      → _CookieRequestHandler (BaseHTTPRequestHandler)
+        → _save_cookies() → 保存到 {APP_DATA_DIR}/cookies/cookies_{host}_{timestamp}.txt
+        → CookieServer.cookies_received.emit(file_path, url) → Qt 主线程
 ```
 
 ### CookieServer
@@ -121,13 +122,27 @@ class CookieServer(QObject):
 
 ### _CookieRequestHandler
 
-支持：POST /api/cookies（接受 JSON body: `{cookies, url}`）、OPTIONS 预检（CORS）、GET 404。
+支持：POST /api/cookies。请求体符合 `CookiePayload` 数据契约：
+
+```python
+@dataclass
+class CookiePayload:
+    cookies: str = ""    # Netscape 格式 Cookie 文本
+    url: str = ""        # 来源页面 URL
+    source: str = "extension"  # 来源标识
+```
+
+也支持：OPTIONS 预检（CORS）、GET 404。
 
 Cookie 文件名格式：`cookies_{host}_{timestamp}.txt`（host 从 URL 提取，做安全文件名清洗）。
 
 ### _ThreadedHTTPServer
 
 组合 `Thread` + `HTTPServer`，`allow_reuse_address = True`，daemon 线程。
+
+### 去重设计
+
+去重由扩展端（[[BrowserExt]]）在发送前完成：300ms 防抖 + 字符串比较（`cookiesText === _lastCookiesText`）。服务端不保存状态，每次 POST 都直接写入文件。这避免了服务端维护 MD5 缓存带来的线程安全隐忧，也让服务器可以被多个扩展实例独立访问。
 
 ---
 

@@ -18,6 +18,7 @@ import platform
 import subprocess
 import sys
 from pathlib import Path
+from typing import Optional
 
 # Handle resource paths for both development and installed package
 def get_asset_path(asset_relative_path: str) -> Path:
@@ -79,6 +80,26 @@ def get_asset_path(asset_relative_path: str) -> Path:
 # Assets Constants
 ICON_PATH: Path = get_asset_path("assets/Icon/icon.png")
 SOUND_PATH: Path = get_asset_path("assets/sound/notification.mp3")
+
+
+def get_bundled_path(relative_path: str) -> Optional[Path]:
+    """
+    Get the path to a bundled resource (browser_ext, etc.) in both dev and frozen mode.
+
+    In PyInstaller ``--onefile`` mode, data files added via ``--add-data`` are
+    extracted to ``sys._MEIPASS``. In development mode, the source is in the
+    project root's ``sage_dlp/`` subdirectory.
+    Returns ``None`` if the path does not exist.
+    """
+    # Frozen mode: PyInstaller extracts to sys._MEIPASS
+    if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+        p = Path(sys._MEIPASS) / relative_path
+        if p.exists():
+            return p
+    # Dev mode: look inside sage_dlp/ subdirectory of the project root
+    sage_root = Path(__file__).parent.parent.parent
+    p = sage_root / "sage_dlp" / relative_path
+    return p if p.exists() else None
 
 OS_NAME: str = platform.system()  # Windows ; Darwin ; Linux
 

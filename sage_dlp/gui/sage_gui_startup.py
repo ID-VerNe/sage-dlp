@@ -9,17 +9,26 @@ persistence, and the application close event cleanup.
 """
 
 import webbrowser
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 import markdown
 from PySide6.QtCore import QByteArray, Qt, QTimer, QUrl
-from PySide6.QtGui import QIcon
-from PySide6.QtWidgets import QHBoxLayout, QLabel, QPushButton, QTextEdit, QVBoxLayout, QStyle
+from PySide6.QtGui import QDesktopServices, QIcon
+from PySide6.QtWidgets import (
+    QDialog,
+    QFrame,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QTextEdit,
+    QVBoxLayout,
+    QStyle,
+)
 
 from ..core.sage_utils import check_ffmpeg, should_check_for_auto_update
 from ..core.sage_yt_dlp import get_yt_dlp_path, DownloadYtdlpThread
 from ..core.sage_deno import check_deno_binary, DownloadDenoThread
-from ..utils.sage_constants import ICON_PATH, SOUND_PATH
+from ..utils.sage_constants import APP_DIR, ICON_PATH, SOUND_PATH, get_bundled_path
 from ..utils.sage_config_manager import ConfigManager
 from ..utils.sage_localization import _
 from ..utils.sage_logger import logger
@@ -57,6 +66,11 @@ class StartupMixin:
     def _perform_startup_checks(self: "SageApp") -> None:
         """Perform potentially blocking startup checks after UI is shown."""
 
+        # First-run welcome dialog
+        if ConfigManager.get("first_run") is not False:
+            QTimer.singleShot(500, self._show_welcome_dialog)
+            ConfigManager.set("first_run", False)
+
         # Silently install FFmpeg in background if missing
         if not check_ffmpeg():
             logger.info("FFmpeg not found — starting silent background installation")
@@ -89,6 +103,153 @@ class StartupMixin:
 
         # Check for auto-updates if enabled
         QTimer.singleShot(2000, self.check_auto_update_ytdlp) # Further delay auto-update check
+
+    # ---- Welcome dialog (first run) -----------------------------------
+
+    def _show_welcome_dialog(self: "SageApp") -> None:
+        """Show a welcome dialog on first run with setup guidance."""
+        dlg = QDialog(self)
+        dlg.setWindowTitle(_("welcome_dialog.title"))
+        dlg.setMinimumWidth(560)
+        dlg.setMinimumHeight(480)
+        dlg.setWindowFlags(dlg.windowFlags() & ~Qt.WindowContextHelpButtonHint)
+
+        try:
+            if self.windowIcon() and not self.windowIcon().isNull():
+                dlg.setWindowIcon(self.windowIcon())
+        except Exception:
+            pass
+
+        layout = QVBoxLayout(dlg)
+        layout.setSpacing(16)
+        layout.setContentsMargins(24, 24, 24, 24)
+
+        # ── Header ──────────────────────────────────────────────────
+        header = QLabel(f'<h1 style="font-size: 22px; font-weight: 700; margin: 0;">{_("welcome_dialog.title")}</h1>')
+        header.setWordWrap(True)
+        layout.addWidget(header)
+
+        desc = QLabel(_("welcome_dialog.desc"))
+        desc.setWordWrap(True)
+        desc.setStyleSheet("color: #64748b; font-size: 13px; margin-bottom: 8px;")
+        layout.addWidget(desc)
+
+        # ── Config file location ────────────────────────────────────
+        config_frame = QFrame()
+        config_frame.setStyleSheet(
+            "QFrame { background: #f8fafc; border: 1px solid #e2e8f0; "
+            "border-radius: 8px; padding: 12px; }"
+        )
+        cfg_layout = QVBoxLayout(config_frame)
+        cfg_layout.setSpacing(4)
+        cfg_layout.setContentsMargins(12, 10, 12, 10)
+
+        cfg_title = QLabel(f"<b>{_('welcome_dialog.config_location')}</b>")
+        cfg_layout.addWidget(cfg_title)
+
+        cfg_path = QLabel(str(APP_DIR))
+        cfg_path.setStyleSheet(
+            "color: #2563eb; font-family: 'Cascadia Code', 'Consolas', monospace; "
+            "font-size: 12px; background: #f1f5f9; padding: 4px 8px; "
+            "border-radius: 4px;"
+        )
+        cfg_path.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        cfg_layout.addWidget(cfg_path)
+
+        cfg_hint = QLabel(_("welcome_dialog.config_hint"))
+        cfg_hint.setStyleSheet("color: #94a3b8; font-size: 11px;")
+        cfg_hint.setWordWrap(True)
+        cfg_layout.addWidget(cfg_hint)
+
+        layout.addWidget(config_frame)
+
+        # ── Browser extension ───────────────────────────────────────
+        ext_frame = QFrame()
+        ext_frame.setStyleSheet(
+            "QFrame { background: #f0fdf4; border: 1px solid #bbf7d0; "
+            "border-radius: 8px; padding: 12px; }"
+        )
+        ext_layout = QVBoxLayout(ext_frame)
+        ext_layout.setSpacing(6)
+        ext_layout.setContentsMargins(12, 10, 12, 10)
+
+        ext_title = QLabel(f"<b>{_('welcome_dialog.extension')}</b>")
+        ext_layout.addWidget(ext_title)
+
+        ext_desc = QLabel(_("welcome_dialog.extension_desc"))
+        ext_desc.setWordWrap(True)
+        ext_desc.setStyleSheet("color: #475569; font-size: 12px;")
+        ext_layout.addWidget(ext_desc)
+
+        # Steps
+        steps = QLabel(_("welcome_dialog.extension_steps"))
+        steps.setWordWrap(True)
+        steps.setTextFormat(Qt.RichText)
+        ext_layout.addWidget(steps)
+
+        # Buttons row
+        btn_row = QHBoxLayout()
+        btn_row.setSpacing(8)
+
+        import shutil
+
+        ext_path = get_bundled_path("browser_ext")
+        # Copy src/ to permanent location (the src/ dir has manifest.json)
+        permanent_ext_path = APP_DIR / "browser_ext"
+        src_path = ext_path / "src" if ext_path else None
+        if src_path and src_path.exists():
+            if not permanent_ext_path.exists():
+                try:
+                    shutil.copytree(str(src_path), str(permanent_ext_path))
+                    logger.info(f"Browser extension copied to: {permanent_ext_path}")
+                except Exception as e:
+                    logger.warning(f"Failed to copy browser extension: {e}")
+                    permanent_ext_path = src_path  # fallback to temp path
+            btn_open_ext = QPushButton(_("welcome_dialog.open_extension_folder"))
+            btn_open_ext.setStyleSheet(
+                "QPushButton { background: #f0fdf4; border: 1px solid #86efac; "
+                "border-radius: 6px; padding: 6px 14px; font-size: 12px; color: #166534; }"
+                "QPushButton:hover { background: #dcfce7; }"
+            )
+            btn_open_ext.clicked.connect(
+                    lambda: QDesktopServices.openUrl(QUrl.fromLocalFile(str(permanent_ext_path)))
+                )
+            btn_row.addWidget(btn_open_ext)
+
+        btn_tutorial = QPushButton(_("welcome_dialog.view_tutorial"))
+        btn_tutorial.setStyleSheet(
+            "QPushButton { background: #f0fdf4; border: 1px solid #86efac; "
+            "border-radius: 6px; padding: 6px 14px; font-size: 12px; color: #166534; }"
+            "QPushButton:hover { background: #dcfce7; }"
+        )
+        btn_tutorial.clicked.connect(
+            lambda: webbrowser.open(
+                "https://github.com/ID-VerNe/sage-dlp/tree/master/sage_dlp/browser_ext"
+            )
+        )
+        btn_row.addWidget(btn_tutorial)
+        btn_row.addStretch()
+
+        ext_layout.addLayout(btn_row)
+        layout.addWidget(ext_frame)
+
+        # ── Spacer ──────────────────────────────────────────────────
+        layout.addStretch()
+
+        # ── Get Started button ──────────────────────────────────────
+        launch_btn = QPushButton(_("welcome_dialog.get_started"))
+        launch_btn.setStyleSheet(
+            "QPushButton { background: #2563eb; color: white; border: none; "
+            "border-radius: 8px; padding: 12px 32px; font-size: 15px; font-weight: 600; }"
+            "QPushButton:hover { background: #1d4ed8; }"
+        )
+        launch_btn.setCursor(Qt.PointingHandCursor)
+        launch_btn.clicked.connect(dlg.accept)
+        layout.addWidget(launch_btn, alignment=Qt.AlignCenter)
+
+        # ── Dialog style ────────────────────────────────────────────
+        dlg.setStyleSheet("QDialog { background: #ffffff; }")
+        self.run_dialog_with_blur(dlg)
 
     def play_notification_sound(self: "SageApp") -> None:
         """Play notification sound asynchronously (non-blocking)."""

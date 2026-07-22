@@ -3,17 +3,21 @@ Custom functionality dialogs for SageDLP application.
 Contains dialogs for custom commands, cookies, time ranges, and other special features.
 """
 
+import shutil
 import threading
+import webbrowser
 from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
-from PySide6.QtCore import Q_ARG, QMetaObject, Qt, Signal
+from PySide6.QtCore import Q_ARG, QMetaObject, Qt, QUrl, Signal
+from PySide6.QtGui import QDesktopServices
 from PySide6.QtWidgets import (
     QCheckBox,
     QComboBox,
     QDialog,
     QDialogButtonBox,
     QFileDialog,
+    QFrame,
     QGroupBox,
     QHBoxLayout,
     QLabel,
@@ -29,6 +33,7 @@ from PySide6.QtWidgets import (
 from ..sage_smooth_tab_widget import SmoothTabWidget
 from ...core.sage_utils import update_auto_update_settings
 from ...utils.sage_config_manager import ConfigManager
+from ...utils.sage_constants import APP_DIR, get_bundled_path
 from ...utils.sage_localization import LocalizationManager, _
 from ...utils.sage_logger import logger
 from .sage_dialogs_updater import UpdaterTabWidget
@@ -496,6 +501,64 @@ class CustomOptionsDialog(QDialog):
         self.tab_widget.addTab(llm_tab, _("llm.tab_title"))
         self.tab_widget.addTab(self.updater_tab, _("tabs.updater"))
         self.tab_widget.addTab(language_tab, _("tabs.language"))
+
+        # === Browser Extension Tab ===
+        ext_tab = QWidget()
+        ext_layout = QVBoxLayout(ext_tab)
+        ext_layout.setSpacing(12)
+
+        ext_help = QLabel(_("welcome_dialog.extension_desc"))
+        ext_help.setWordWrap(True)
+        ext_help.setStyleSheet("color: #475569; padding: 10px;")
+        ext_layout.addWidget(ext_help)
+
+        # Steps
+        steps = QLabel(_("welcome_dialog.extension_steps"))
+        steps.setWordWrap(True)
+        steps.setTextFormat(Qt.RichText)
+        ext_layout.addWidget(steps)
+
+        # Buttons row
+        btn_row = QHBoxLayout()
+        btn_row.setSpacing(8)
+
+        ext_path = get_bundled_path("browser_ext")
+        permanent_ext_path = APP_DIR / "browser_ext"
+        src_path = ext_path / "src" if ext_path else None
+        if src_path and src_path.exists():
+            if not permanent_ext_path.exists():
+                try:
+                    shutil.copytree(str(src_path), str(permanent_ext_path))
+                except Exception:
+                    permanent_ext_path = ext_path  # fallback
+            btn_open = QPushButton(_("welcome_dialog.open_extension_folder"))
+            btn_open.setStyleSheet(
+                "QPushButton { background: #f0fdf4; border: 1px solid #86efac; "
+                "border-radius: 6px; padding: 6px 14px; font-size: 12px; color: #166534; }"
+                "QPushButton:hover { background: #dcfce7; }"
+            )
+            btn_open.clicked.connect(
+                lambda: QDesktopServices.openUrl(QUrl.fromLocalFile(str(permanent_ext_path)))
+            )
+            btn_row.addWidget(btn_open)
+
+        btn_tutorial = QPushButton(_("welcome_dialog.view_tutorial"))
+        btn_tutorial.setStyleSheet(
+            "QPushButton { background: #f0fdf4; border: 1px solid #86efac; "
+            "border-radius: 6px; padding: 6px 14px; font-size: 12px; color: #166534; }"
+            "QPushButton:hover { background: #dcfce7; }"
+        )
+        btn_tutorial.clicked.connect(
+            lambda: webbrowser.open(
+                "https://github.com/ID-VerNe/sage-dlp/tree/master/sage_dlp/browser_ext"
+            )
+        )
+        btn_row.addWidget(btn_tutorial)
+        btn_row.addStretch()
+        ext_layout.addLayout(btn_row)
+        ext_layout.addStretch()
+
+        self.tab_widget.addTab(ext_tab, _("welcome_dialog.extension"))
 
         # Dialog buttons
         button_box = QDialogButtonBox()

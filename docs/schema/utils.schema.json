@@ -10,7 +10,8 @@
       { "name": "_", "kind": "function", "params": ["key", "**kwargs"], "returns": "str" }
     ],
     "sage_cookie_server": [
-      { "name": "CookieServer", "kind": "class", "bases": ["QObject"], "signals": ["cookies_received"], "methods": ["start", "stop"] }
+      { "name": "CookieServer", "kind": "class", "bases": ["QObject"], "signals": ["cookies_received"], "methods": ["start", "stop"] },
+      { "name": "_CookieRequestHandler", "kind": "class", "note": "无状态设计，去重由扩展端负责" }
     ],
     "sage_history_manager": [
       { "name": "HistoryManager", "kind": "class", "methods": ["add_entry", "get_all_entries", "get_entry", "remove_entry", "clear_history", "search_entries"] }

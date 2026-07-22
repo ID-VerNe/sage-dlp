@@ -125,19 +125,23 @@ class _CookieRequestHandler(http.server.BaseHTTPRequestHandler):
         COOKIE_STORAGE_DIR.mkdir(parents=True, exist_ok=True)
 
         # Derive a safe filename from the URL hostname
-        try:
-            # Extract hostname from URL — no DNS resolution (avoids DNS leak / blocking)
-            host = url.split("/")[2] if "//" in url else "unknown"
-            # Sanitize: keep only safe chars for a filename
-            host = "".join(c if c.isalnum() or c in ".-_" else "_" for c in host)
-        except Exception:
-            host = "unknown"
+        host = self._extract_host(url)
         from datetime import datetime
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"cookies_{host}_{ts}.txt"
         dest = COOKIE_STORAGE_DIR / filename
         dest.write_text(cookies_text, encoding="utf-8")
         return dest
+
+    @staticmethod
+    def _extract_host(url: str) -> str:
+        """Extract a sanitized hostname from URL for filenames / dedup keys."""
+        try:
+            host = url.split("/")[2] if "//" in url else "unknown"
+            host = "".join(c if c.isalnum() or c in ".-_" else "_" for c in host)
+        except Exception:
+            host = "unknown"
+        return host
 
     def _set_cors_headers(self) -> None:
         self.send_header("Access-Control-Allow-Origin", "*")

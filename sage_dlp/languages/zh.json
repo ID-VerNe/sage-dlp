@@ -512,6 +512,18 @@
     "download_update": "下载更新",
     "remind_later": "稍后提醒"
   },
+  "welcome_dialog": {
+    "title": "欢迎使用 SageDLP",
+    "desc": "SageDLP 已准备好开始下载。yt-dlp、ffmpeg 等依赖会自动下载，无需手动操作。",
+    "config_location": "配置与数据目录",
+    "config_hint": "设置、缓存、日志和下载的二进制文件都存储在此目录中。",
+    "extension": "浏览器扩展（可选）",
+    "extension_desc": "安装 Chrome/Edge 扩展后，浏览器中的 Cookie 会自动同步到 SageDLP，无需手动导出 Cookie 文件。",
+    "extension_steps": "<ol style='margin: 4px 0 0 20px; padding: 0; font-size: 12px; color: #334155;'><li>打开 Chrome/Edge，地址栏输入 <code>chrome://extensions</code></li><li>打开右上角的 <b>开发者模式</b></li><li>点击 <b>加载已解压的扩展程序</b>，选择扩展文件夹</li><li>完成！Cookie 将自动同步</li></ol>",
+    "open_extension_folder": "打开扩展文件夹",
+    "view_tutorial": "查看教程",
+    "get_started": "开始使用"
+  },
   "time_range": {
     "title": "下载时间段设置",
     "start": "开始时间",

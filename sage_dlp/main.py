@@ -10,10 +10,17 @@ if os.path.exists(EMBED_TCL_DIR):
     os.environ["TK_LIBRARY"] = os.path.join(EMBED_TCL_DIR, "tk8.6")
 # ------------------------------------------------------------------
 
+# Ensure the package root is on sys.path for absolute imports.
+# Needed when running as a script directly (python sage_dlp/main.py)
+# or when frozen by PyInstaller (relative imports fail in both cases).
+if not __package__ or getattr(sys, "frozen", False):
+    if PROJECT_ROOT not in sys.path:
+        sys.path.insert(0, PROJECT_ROOT)
+
 from PySide6.QtWidgets import QApplication, QMessageBox
 
-from .utils.sage_logger import logger
-from .gui.sage_gui_main import SageApp  # Import the main application class from sage_gui_main
+from sage_dlp.utils.sage_logger import logger
+from sage_dlp.gui.sage_gui_main import SageApp  # Import the main application class from sage_gui_main
 
 
 def show_error_dialog(message):

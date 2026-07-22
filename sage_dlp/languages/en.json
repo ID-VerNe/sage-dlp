@@ -491,6 +491,18 @@
     "download_update": "Download Update",
     "remind_later": "Remind Me Later"
   },
+  "welcome_dialog": {
+    "title": "Welcome to SageDLP",
+    "desc": "SageDLP is ready to start downloading. yt-dlp, ffmpeg and other dependencies will be downloaded automatically.",
+    "config_location": "Configuration & Data Directory",
+    "config_hint": "Settings, cache, logs and downloaded binaries are stored here.",
+    "extension": "Browser Extension (Optional)",
+    "extension_desc": "Install the Chrome/Edge extension to auto-sync cookies from your browser — no more manual cookie file exports.",
+    "extension_steps": "<ol style='margin: 4px 0 0 20px; padding: 0; font-size: 12px; color: #334155;'><li>Open Chrome/Edge and go to <code>chrome://extensions</code></li><li>Turn on <b>Developer mode</b> (top-right corner)</li><li>Click <b>Load unpacked</b> and select the extension folder</li><li>Done! Cookies will sync automatically</li></ol>",
+    "open_extension_folder": "Open Extension Folder",
+    "view_tutorial": "View Tutorial",
+    "get_started": "Get Started"
+  },
   "playlist": {
     "unknown": "Unknown Playlist",
     "total_videos": "Total Videos: {count}",

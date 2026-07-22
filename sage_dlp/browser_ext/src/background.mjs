@@ -42,37 +42,50 @@ const serializeNetscape = (cookies) => {
 };
 
 /**
- * Post cookie data to the local SageDLP server silently.
+ * Post cookie data to the local SageDLP server with debounce + dedup.
  * Failures are logged to console only — never show a user-facing error.
  */
+const _debounceTimers = new Map();
+let _lastCookiesText = '';
+
 const postCookiesToServer = async (urlString) => {
-  if (!urlString) return;
-  try {
-    const url = new URL(urlString);
-    const cookies = await getAllCookies({
-      url: url.href,
-      partitionKey: { topLevelSite: url.origin },
-    });
-    if (!cookies.length) return;
-
-    const cookiesText = serializeNetscape(cookies);
-
-    await fetch(SAGEDLP_SERVER_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        cookies: cookiesText,
+  // Debounce: clear previous timer for this URL host
+  let host = '';
+  try { host = new URL(urlString).hostname; } catch { host = 'unknown'; }
+  clearTimeout(_debounceTimers.get(host));
+  _debounceTimers.set(host, setTimeout(async () => {
+    if (!urlString) return;
+    try {
+      const url = new URL(urlString);
+      const cookies = await getAllCookies({
         url: url.href,
-        source: 'extension',
-      }),
-    });
-  } catch (_err) {
-    // Silently ignore — server may not be running
-  }
+        partitionKey: { topLevelSite: url.origin },
+      });
+      if (!cookies.length) return;
+
+      const cookiesText = serializeNetscape(cookies);
+
+      // String comparison dedup — skip if unchanged
+      if (cookiesText === _lastCookiesText) return;
+      _lastCookiesText = cookiesText;
+
+      await fetch(SAGEDLP_SERVER_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cookies: cookiesText,
+          url: url.href,
+          source: 'extension',
+        }),
+      });
+    } catch (_err) {
+      console.warn('[SageDLP] Cookie sync failed:', _err);
+    }
+  }, 300));
 };
 
 // ---------------------------------------------------------------------------
-// Badge counter (original functionality preserved)
+// Badge counter — only updates the badge, no POST
 // ---------------------------------------------------------------------------
 
 const updateBadgeCounter = async () => {
@@ -95,12 +108,23 @@ const updateBadgeCounter = async () => {
   });
   const text = cookies.length.toFixed();
   chrome.action.setBadgeText({ tabId, text });
-
-  // --- AUTO-POST cookies to SageDLP server whenever the badge updates ---
-  postCookiesToServer(urlString);
 };
 
-chrome.cookies.onChanged.addListener(updateBadgeCounter);
+// ---------------------------------------------------------------------------
+// Cookie change handler — only this triggers a POST to the server
+// ---------------------------------------------------------------------------
+
+const handleCookieChanged = async (_changeInfo) => {
+  const [tab] = await chrome.tabs.query({
+    active: true,
+    currentWindow: true,
+  });
+  if (!tab || !tab.url) return;
+  postCookiesToServer(tab.url);
+};
+
+// Only cookies.onChanged triggers a POST; other events only update the badge
+chrome.cookies.onChanged.addListener(handleCookieChanged);
 chrome.tabs.onUpdated.addListener(updateBadgeCounter);
 chrome.tabs.onActivated.addListener(updateBadgeCounter);
 chrome.windows.onFocusChanged.addListener(updateBadgeCounter);
