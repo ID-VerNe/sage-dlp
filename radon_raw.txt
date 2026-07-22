@@ -1,0 +1,540 @@
+sage_dlp/main.py
+    LOC: 53
+    LLOC: 35
+    SLOC: 35
+    Comments: 10
+    Single comments: 6
+    Multi: 0
+    Blank: 12
+    - Comment Stats
+        (C % L): 19%
+        (C % S): 29%
+        (C + M % L): 19%
+sage_dlp/__init__.py
+    LOC: 8
+    LLOC: 3
+    SLOC: 2
+    Comments: 0
+    Single comments: 0
+    Multi: 4
+    Blank: 2
+    - Comment Stats
+        (C % L): 0%
+        (C % S): 0%
+        (C + M % L): 50%
+sage_dlp/utils/sage_history_manager.py
+    LOC: 429
+    LLOC: 219
+    SLOC: 287
+    Comments: 25
+    Single comments: 27
+    Multi: 51
+    Blank: 64
+    - Comment Stats
+        (C % L): 6%
+        (C % S): 9%
+        (C + M % L): 18%
+sage_dlp/utils/sage_constants.py
+    LOC: 248
+    LLOC: 173
+    SLOC: 137
+    Comments: 42
+    Single comments: 39
+    Multi: 26
+    Blank: 46
+    - Comment Stats
+        (C % L): 17%
+        (C % S): 31%
+        (C + M % L): 27%
+sage_dlp/utils/sage_logger.py
+    LOC: 56
+    LLOC: 20
+    SLOC: 34
+    Comments: 3
+    Single comments: 3
+    Multi: 5
+    Blank: 14
+    - Comment Stats
+        (C % L): 5%
+        (C % S): 9%
+        (C + M % L): 14%
+sage_dlp/utils/sage_flow_layout.py
+    LOC: 104
+    LLOC: 74
+    SLOC: 71
+    Comments: 1
+    Single comments: 2
+    Multi: 8
+    Blank: 23
+    - Comment Stats
+        (C % L): 1%
+        (C % S): 1%
+        (C + M % L): 9%
+sage_dlp/utils/sage_localization.py
+    LOC: 416
+    LLOC: 100
+    SLOC: 283
+    Comments: 13
+    Single comments: 14
+    Multi: 73
+    Blank: 46
+    - Comment Stats
+        (C % L): 3%
+        (C % S): 5%
+        (C + M % L): 21%
+sage_dlp/utils/__init__.py
+    LOC: 5
+    LLOC: 1
+    SLOC: 0
+    Comments: 0
+    Single comments: 0
+    Multi: 4
+    Blank: 1
+    - Comment Stats
+        (C % L): 0%
+        (C % S): 0%
+        (C + M % L): 80%
+sage_dlp/utils/sage_config_manager.py
+    LOC: 239
+    LLOC: 98
+    SLOC: 129
+    Comments: 5
+    Single comments: 1
+    Multi: 87
+    Blank: 22
+    - Comment Stats
+        (C % L): 2%
+        (C % S): 4%
+        (C + M % L): 38%
+sage_dlp/utils/sage_cookie_server.py
+    LOC: 274
+    LLOC: 160
+    SLOC: 149
+    Comments: 36
+    Single comments: 41
+    Multi: 36
+    Blank: 48
+    - Comment Stats
+        (C % L): 13%
+        (C % S): 24%
+        (C + M % L): 26%
+sage_dlp/core/sage_utils.py
+    LOC: 797
+    LLOC: 477
+    SLOC: 507
+    Comments: 101
+    Single comments: 113
+    Multi: 23
+    Blank: 154
+    - Comment Stats
+        (C % L): 13%
+        (C % S): 20%
+        (C + M % L): 16%
+sage_dlp/core/sage_json3_parser.py
+    LOC: 103
+    LLOC: 50
+    SLOC: 52
+    Comments: 8
+    Single comments: 9
+    Multi: 23
+    Blank: 19
+    - Comment Stats
+        (C % L): 8%
+        (C % S): 15%
+        (C + M % L): 30%
+sage_dlp/core/sage_llm_segmenter.py
+    LOC: 108
+    LLOC: 40
+    SLOC: 58
+    Comments: 11
+    Single comments: 11
+    Multi: 19
+    Blank: 20
+    - Comment Stats
+        (C % L): 10%
+        (C % S): 19%
+        (C + M % L): 28%
+sage_dlp/core/__init__.py
+    LOC: 5
+    LLOC: 1
+    SLOC: 0
+    Comments: 0
+    Single comments: 0
+    Multi: 4
+    Blank: 1
+    - Comment Stats
+        (C % L): 0%
+        (C % S): 0%
+        (C + M % L): 80%
+sage_dlp/core/sage_subtitle_processor.py
+    LOC: 319
+    LLOC: 248
+    SLOC: 241
+    Comments: 35
+    Single comments: 27
+    Multi: 0
+    Blank: 51
+    - Comment Stats
+        (C % L): 11%
+        (C % S): 15%
+        (C + M % L): 11%
+sage_dlp/core/sage_deno.py
+    LOC: 206
+    LLOC: 106
+    SLOC: 117
+    Comments: 19
+    Single comments: 17
+    Multi: 37
+    Blank: 35
+    - Comment Stats
+        (C % L): 9%
+        (C % S): 16%
+        (C + M % L): 27%
+sage_dlp/core/sage_downloader.py
+    LOC: 1127
+    LLOC: 743
+    SLOC: 767
+    Comments: 216
+    Single comments: 198
+    Multi: 19
+    Blank: 143
+    - Comment Stats
+        (C % L): 19%
+        (C % S): 28%
+        (C + M % L): 21%
+sage_dlp/core/sage_llm_client.py
+    LOC: 173
+    LLOC: 136
+    SLOC: 140
+    Comments: 5
+    Single comments: 7
+    Multi: 0
+    Blank: 26
+    - Comment Stats
+        (C % L): 3%
+        (C % S): 4%
+        (C + M % L): 3%
+sage_dlp/core/sage_logic_rule.py
+    LOC: 151
+    LLOC: 98
+    SLOC: 107
+    Comments: 15
+    Single comments: 17
+    Multi: 0
+    Blank: 27
+    - Comment Stats
+        (C % L): 10%
+        (C % S): 14%
+        (C + M % L): 10%
+sage_dlp/core/sage_ffmpeg.py
+    LOC: 467
+    LLOC: 305
+    SLOC: 342
+    Comments: 51
+    Single comments: 51
+    Multi: 9
+    Blank: 65
+    - Comment Stats
+        (C % L): 11%
+        (C % S): 15%
+        (C + M % L): 13%
+sage_dlp/core/sage_logic_llm.py
+    LOC: 370
+    LLOC: 226
+    SLOC: 251
+    Comments: 35
+    Single comments: 39
+    Multi: 8
+    Blank: 72
+    - Comment Stats
+        (C % L): 9%
+        (C % S): 14%
+        (C + M % L): 12%
+sage_dlp/core/sage_yt_dlp.py
+    LOC: 207
+    LLOC: 118
+    SLOC: 125
+    Comments: 24
+    Single comments: 22
+    Multi: 25
+    Blank: 35
+    - Comment Stats
+        (C % L): 12%
+        (C % S): 19%
+        (C + M % L): 24%
+sage_dlp/core/sage_grammar_constants.py
+    LOC: 53
+    LLOC: 8
+    SLOC: 35
+    Comments: 8
+    Single comments: 7
+    Multi: 4
+    Blank: 7
+    - Comment Stats
+        (C % L): 15%
+        (C % S): 23%
+        (C + M % L): 23%
+sage_dlp/gui/sage_gui_ui.py
+    LOC: 493
+    LLOC: 318
+    SLOC: 333
+    Comments: 79
+    Single comments: 69
+    Multi: 7
+    Blank: 84
+    - Comment Stats
+        (C % L): 16%
+        (C % S): 24%
+        (C + M % L): 17%
+sage_dlp/gui/sage_gui_main.py
+    LOC: 148
+    LLOC: 91
+    SLOC: 99
+    Comments: 30
+    Single comments: 16
+    Multi: 13
+    Blank: 20
+    - Comment Stats
+        (C % L): 20%
+        (C % S): 30%
+        (C + M % L): 29%
+sage_dlp/gui/sage_gui_analysis.py
+    LOC: 486
+    LLOC: 329
+    SLOC: 345
+    Comments: 45
+    Single comments: 50
+    Multi: 4
+    Blank: 87
+    - Comment Stats
+        (C % L): 9%
+        (C % S): 13%
+        (C + M % L): 10%
+sage_dlp/gui/sage_gui_animations.py
+    LOC: 208
+    LLOC: 136
+    SLOC: 128
+    Comments: 27
+    Single comments: 31
+    Multi: 5
+    Blank: 44
+    - Comment Stats
+        (C % L): 13%
+        (C % S): 21%
+        (C + M % L): 15%
+sage_dlp/gui/sage_gui_format_table.py
+    LOC: 660
+    LLOC: 408
+    SLOC: 487
+    Comments: 109
+    Single comments: 73
+    Multi: 10
+    Blank: 90
+    - Comment Stats
+        (C % L): 17%
+        (C % S): 22%
+        (C + M % L): 18%
+sage_dlp/gui/sage_gui_video_info.py
+    LOC: 421
+    LLOC: 253
+    SLOC: 298
+    Comments: 66
+    Single comments: 53
+    Multi: 4
+    Blank: 66
+    - Comment Stats
+        (C % L): 16%
+        (C % S): 22%
+        (C + M % L): 17%
+sage_dlp/gui/sage_smooth_tab_widget.py
+    LOC: 123
+    LLOC: 71
+    SLOC: 74
+    Comments: 16
+    Single comments: 16
+    Multi: 7
+    Blank: 26
+    - Comment Stats
+        (C % L): 13%
+        (C % S): 22%
+        (C + M % L): 19%
+sage_dlp/gui/sage_gui_startup.py
+    LOC: 535
+    LLOC: 349
+    SLOC: 381
+    Comments: 70
+    Single comments: 63
+    Multi: 7
+    Blank: 84
+    - Comment Stats
+        (C % L): 13%
+        (C % S): 18%
+        (C + M % L): 14%
+sage_dlp/gui/sage_gui_dialogs_ops.py
+    LOC: 276
+    LLOC: 189
+    SLOC: 207
+    Comments: 24
+    Single comments: 23
+    Multi: 11
+    Blank: 35
+    - Comment Stats
+        (C % L): 9%
+        (C % S): 12%
+        (C + M % L): 13%
+sage_dlp/gui/__init__.py
+    LOC: 5
+    LLOC: 1
+    SLOC: 0
+    Comments: 0
+    Single comments: 0
+    Multi: 4
+    Blank: 1
+    - Comment Stats
+        (C % L): 0%
+        (C % S): 0%
+        (C + M % L): 80%
+sage_dlp/gui/sage_stylesheet.py
+    LOC: 647
+    LLOC: 123
+    SLOC: 593
+    Comments: 22
+    Single comments: 16
+    Multi: 8
+    Blank: 30
+    - Comment Stats
+        (C % L): 3%
+        (C % S): 4%
+        (C + M % L): 5%
+sage_dlp/gui/sage_gui_update_check.py
+    LOC: 147
+    LLOC: 92
+    SLOC: 95
+    Comments: 14
+    Single comments: 18
+    Multi: 6
+    Blank: 28
+    - Comment Stats
+        (C % L): 10%
+        (C % S): 15%
+        (C + M % L): 14%
+sage_dlp/gui/sage_gui_download.py
+    LOC: 457
+    LLOC: 274
+    SLOC: 334
+    Comments: 98
+    Single comments: 63
+    Multi: 6
+    Blank: 54
+    - Comment Stats
+        (C % L): 21%
+        (C % S): 29%
+        (C + M % L): 23%
+sage_dlp/gui/sage_gui_dialogs/sage_dialogs_update.py
+    LOC: 460
+    LLOC: 297
+    SLOC: 332
+    Comments: 46
+    Single comments: 44
+    Multi: 5
+    Blank: 79
+    - Comment Stats
+        (C % L): 10%
+        (C % S): 14%
+        (C + M % L): 11%
+sage_dlp/gui/sage_gui_dialogs/sage_dialogs_selection.py
+    LOC: 389
+    LLOC: 231
+    SLOC: 286
+    Comments: 50
+    Single comments: 38
+    Multi: 4
+    Blank: 61
+    - Comment Stats
+        (C % L): 13%
+        (C % S): 17%
+        (C + M % L): 14%
+sage_dlp/gui/sage_gui_dialogs/sage_dialogs_settings.py
+    LOC: 744
+    LLOC: 484
+    SLOC: 516
+    Comments: 67
+    Single comments: 82
+    Multi: 4
+    Blank: 142
+    - Comment Stats
+        (C % L): 9%
+        (C % S): 13%
+        (C + M % L): 10%
+sage_dlp/gui/sage_gui_dialogs/__init__.py
+    LOC: 52
+    LLOC: 9
+    SLOC: 31
+    Comments: 8
+    Single comments: 1
+    Multi: 10
+    Blank: 10
+    - Comment Stats
+        (C % L): 15%
+        (C % S): 26%
+        (C + M % L): 35%
+sage_dlp/gui/sage_gui_dialogs/sage_dialogs_ffmpeg.py
+    LOC: 24
+    LLOC: 11
+    SLOC: 10
+    Comments: 2
+    Single comments: 2
+    Multi: 5
+    Blank: 7
+    - Comment Stats
+        (C % L): 8%
+        (C % S): 20%
+        (C + M % L): 29%
+sage_dlp/gui/sage_gui_dialogs/sage_dialogs_updater.py
+    LOC: 816
+    LLOC: 471
+    SLOC: 558
+    Comments: 84
+    Single comments: 89
+    Multi: 29
+    Blank: 140
+    - Comment Stats
+        (C % L): 10%
+        (C % S): 15%
+        (C + M % L): 14%
+sage_dlp/gui/sage_gui_dialogs/sage_dialogs_base.py
+    LOC: 405
+    LLOC: 112
+    SLOC: 326
+    Comments: 14
+    Single comments: 17
+    Multi: 5
+    Blank: 57
+    - Comment Stats
+        (C % L): 3%
+        (C % S): 4%
+        (C + M % L): 5%
+sage_dlp/gui/sage_gui_dialogs/sage_dialogs_custom.py
+    LOC: 908
+    LLOC: 601
+    SLOC: 652
+    Comments: 99
+    Single comments: 106
+    Multi: 4
+    Blank: 146
+    - Comment Stats
+        (C % L): 11%
+        (C % S): 15%
+        (C + M % L): 11%
+** Total **
+    LOC: 14322
+    LLOC: 8289
+    SLOC: 9954
+    Comments: 1633
+    Single comments: 1521
+    Multi: 623
+    Blank: 2224
+    - Comment Stats
+        (C % L): 11%
+        (C % S): 16%
+        (C + M % L): 16%
